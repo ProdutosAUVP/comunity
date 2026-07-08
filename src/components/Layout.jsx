@@ -60,17 +60,10 @@ export default function Layout({ children }) {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Cabeçalho mobile: SÓ a barra da logo é fixa (nunca acompanha a
-          rolagem). A barra de ações (busca, sino, avatar) fica no fluxo
-          normal da página e rola junto com o conteúdo abaixo dela. */}
-      <div className="fixed inset-x-0 top-0 z-50 flex h-[84px] items-center justify-center border-b border-border/60 bg-background/70 backdrop-blur-md lg:hidden">
-        <Link to="/" aria-label="Comunidade AUVP — início">
-          <AuvpEscolaLogo className="h-[72px] w-auto text-foreground" />
-        </Link>
-      </div>
-      <div className="h-[84px] lg:hidden" aria-hidden />
-
-      <div className="flex h-[64px] items-center gap-[10px] border-b border-border/60 bg-background px-4 lg:hidden">
+      {/* Cabeçalho mobile: SÓ a barra de ações (busca, sino, avatar) é fixa —
+          sempre acessível pra buscar ou navegar, mesmo com a página rolada.
+          A barra da logo fica no fluxo normal e rola junto com o conteúdo. */}
+      <div className="fixed inset-x-0 top-0 z-50 flex h-[64px] items-center gap-[10px] border-b border-border/60 bg-background/70 backdrop-blur-md px-4 lg:hidden">
         {/* Menu hamburguer — a navegação inferior não é usada aqui porque a
             Comunidade roda embutida no SuperApp, que já tem sua própria
             barra de navegação inferior. */}
@@ -101,6 +94,13 @@ export default function Layout({ children }) {
 
         <Link to={`/perfil/${currentUser.id}`} aria-label="Meu perfil" className="shrink-0">
           <Avatar user={currentUser} size={36} showRole={false} />
+        </Link>
+      </div>
+      <div className="h-[64px] lg:hidden" aria-hidden />
+
+      <div className="flex h-[84px] items-center justify-center border-b border-border/60 bg-background lg:hidden">
+        <Link to="/" aria-label="Comunidade AUVP — início">
+          <AuvpEscolaLogo className="h-[72px] w-auto text-foreground" />
         </Link>
       </div>
 
