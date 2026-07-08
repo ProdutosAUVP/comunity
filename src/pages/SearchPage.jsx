@@ -21,9 +21,10 @@ export default function SearchPage() {
   const [query, setQuery] = useState(location.state?.initialQuery || '')
   // O grid de categorias (aba "Tópicos" do Hub) abre a área já filtrada aqui.
   const [area, setArea] = useState(location.state?.initialArea || null)
-  const [tags, setTags] = useState([])
+  // Clicar numa tag ou flair de um post navega pra cá já filtrado por ela.
+  const [tags, setTags] = useState(location.state?.initialTag ? [location.state.initialTag] : [])
   const [turma, setTurma] = useState(null)
-  const [flair, setFlair] = useState(null)
+  const [flair, setFlair] = useState(location.state?.initialFlair || null)
   const [date, setDate] = useState('all')
 
   const toggleTag = (t) => setTags((ts) => (ts.includes(t) ? ts.filter((x) => x !== t) : [...ts, t]))

@@ -63,7 +63,7 @@ export function Eyebrow({ children, className = '' }) {
 }
 
 // ── Flair de post: badge neutro + pequeno indicador de cor pontual ─────────
-export function FlairBadge({ flair, className = '' }) {
+export function FlairBadge({ flair, className = '', onClick }) {
   const token = FLAIR_TOKENS[flair] || 'primary'
   const dotCls =
     token === 'neutral'
@@ -77,13 +77,18 @@ export function FlairBadge({ flair, className = '' }) {
             : token === 'info'
               ? 'bg-info'
               : 'bg-primary'
+  const Comp = onClick ? 'button' : 'span'
   return (
-    <span
-      className={`inline-flex items-center gap-[6px] rounded-[4px] border border-border bg-muted px-[10px] py-[3px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-foreground ${className}`}
+    <Comp
+      type={onClick ? 'button' : undefined}
+      onClick={onClick}
+      className={`inline-flex items-center gap-[6px] rounded-[4px] border border-border bg-muted px-[10px] py-[3px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-foreground transition-all duration-240 ${
+        onClick ? 'hover:border-primary hover:text-primary' : ''
+      } ${className}`}
     >
       <span className={`h-[6px] w-[6px] rounded-full ${dotCls}`} aria-hidden />
       {flair}
-    </span>
+    </Comp>
   )
 }
 
