@@ -4,6 +4,8 @@ import {
   ArrowBendUpLeft,
   ArrowFatUp,
   ArrowLeft,
+  CaretDown,
+  CaretRight,
   CheckCircle,
   Eye,
   EyeSlash,
@@ -207,28 +209,61 @@ function InlineReplyBox({ authorName, onCancel, onSubmit }) {
   )
 }
 
-function CommentNode({ comment, byParent, post, depth, replyingTo, onStartReply, onCancelReply, onSubmitReply, onReport }) {
+// Conta toda a descendência (respostas de respostas) de um comentário, para
+// o resumo exibido quando a thread está recolhida ("X respostas ocultas").
+function countDescendants(byParent, commentId) {
+  const kids = byParent[commentId] || []
+  return kids.reduce((total, k) => total + 1 + countDescendants(byParent, k.id), 0)
+}
+
+function CommentNode({ comment, byParent, post, depth, isLast, replyingTo, onStartReply, onCancelReply, onSubmitReply, onReport }) {
   const { users, commentVotes, voteComment, markSolution, validateAnswer, currentUser, moderationMode } = useApp()
+  const [collapsed, setCollapsed] = useState(false)
   const author = users[comment.authorId]
   const children = byParent[comment.id] || []
   const isSolution = post.solutionCommentId === comment.id
   const canMarkSolution = post.authorId === currentUser.id
   const isReplying = replyingTo === comment.id
+  const descendantCount = children.length > 0 ? countDescendants(byParent, comment.id) : 0
 
   const hiddenPlaceholder = comment.hidden && !moderationMode
 
   return (
-    // Estilo Reddit: sem card/caixa por comentário — só um traço vertical +
-    // recuo por nível de profundidade, conectando resposta ao pai.
-    <div
-      id={`comment-${comment.id}`}
-      className={depth > 0 ? 'ml-[10px] border-l-2 border-border pl-[15px] md:ml-[14px]' : ''}
-    >
+    // Estilo Reddit: sem card/caixa por comentário — traço vertical curvo
+    // (uma "mão" conectando ao pai) por nível de profundidade, e cada nó
+    // pode ser recolhido/expandido para esconder a subthread.
+    <div id={`comment-${comment.id}`} className={depth > 0 ? 'relative ml-[10px] pl-[20px] md:ml-[14px]' : ''}>
+      {depth > 0 && (
+        <>
+          <span
+            className="pointer-events-none absolute left-0 top-0 w-[20px] border-l-2 border-border"
+            style={{ height: isLast ? '26px' : '100%' }}
+            aria-hidden
+          />
+          <span
+            className="pointer-events-none absolute left-0 top-0 h-[26px] w-[20px] rounded-bl-[10px] border-b-2 border-l-2 border-border"
+            aria-hidden
+          />
+        </>
+      )}
+
       {hiddenPlaceholder ? (
         <div className="flex items-center gap-[8px] py-[10px] text-muted-foreground">
           <EyeSlash size={15} weight="bold" />
           <p className="font-roboto text-[13px]">Comentário ocultado pela moderação.</p>
         </div>
+      ) : collapsed ? (
+        <button
+          onClick={() => setCollapsed(false)}
+          className="flex w-full items-center gap-[8px] py-[10px] text-left transition-all duration-240 hover:bg-muted/40"
+        >
+          <CaretRight size={13} weight="bold" className="shrink-0 text-muted-foreground" />
+          <Avatar user={author} size={20} showRole={false} />
+          <span className="font-roboto text-[13px] font-medium text-foreground">{author.nickname}</span>
+          <span className="font-roboto text-[12px] text-muted-foreground">
+            · {timeAgo(comment.createdAt)} · {descendantCount > 0 ? `${descendantCount + 1} comentários ocultos` : 'comentário oculto'}
+          </span>
+        </button>
       ) : (
         <div className="py-[10px]">
           {moderationMode && (
@@ -237,6 +272,14 @@ function CommentNode({ comment, byParent, post, depth, replyingTo, onStartReply,
             </div>
           )}
           <div className="flex gap-[10px]">
+            <button
+              onClick={() => setCollapsed(true)}
+              aria-label="Recolher thread"
+              title="Recolher thread"
+              className="mt-[2px] h-fit shrink-0 rounded-[4px] p-[2px] text-muted-foreground transition-all duration-240 hover:bg-muted hover:text-foreground"
+            >
+              <CaretDown size={12} weight="bold" />
+            </button>
             <CommentUpvote
               score={comment.upvotes}
               active={(commentVotes[comment.id] || 0) === 1}
@@ -320,15 +363,16 @@ function CommentNode({ comment, byParent, post, depth, replyingTo, onStartReply,
         </div>
       )}
 
-      {children.length > 0 && (
+      {!collapsed && children.length > 0 && (
         <div className="flex flex-col">
-          {children.map((child) => (
+          {children.map((child, i) => (
             <CommentNode
               key={child.id}
               comment={child}
               byParent={byParent}
               post={post}
               depth={depth + 1}
+              isLast={i === children.length - 1}
               replyingTo={replyingTo}
               onStartReply={onStartReply}
               onCancelReply={onCancelReply}
