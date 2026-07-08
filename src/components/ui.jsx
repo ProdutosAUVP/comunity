@@ -110,6 +110,23 @@ export function TurmaTag({ turma }) {
   )
 }
 
+// Área (fórum) do tópico — categoria ampla, distinta de tags específicas.
+export function AreaPill({ label, active = false, onClick }) {
+  const cls = active
+    ? 'bg-primary text-primary-foreground border-primary'
+    : 'bg-primary/10 text-primary border-transparent hover:bg-primary/15'
+  const Comp = onClick ? 'button' : 'span'
+  return (
+    <Comp
+      type={onClick ? 'button' : undefined}
+      onClick={onClick}
+      className={`inline-flex items-center rounded-[4px] border px-[8px] py-[2px] font-sora text-[11px] font-bold uppercase tracking-[0.03em] transition-all duration-240 ${cls}`}
+    >
+      {label}
+    </Comp>
+  )
+}
+
 // ── Avatar com hierarquia visual (conselheiro em destaque / moderador) ─────
 export function Avatar({ user, size = 44, showRole = true }) {
   const isCounselor = user.role === 'conselheiro'
@@ -228,7 +245,7 @@ export function ToastStack() {
   const { toasts } = useApp()
   if (!toasts.length) return null
   return (
-    <div className="fixed bottom-[65px] left-1/2 -translate-x-1/2 z-[60] flex flex-col gap-[8px] w-[calc(100%-30px)] max-w-[440px]" aria-live="polite">
+    <div className="fixed bottom-[65px] lg:bottom-[15px] left-1/2 -translate-x-1/2 z-[60] flex flex-col gap-[8px] w-[calc(100%-30px)] max-w-[440px]" aria-live="polite">
       {toasts.map((t) => (
         <div
           key={t.id}

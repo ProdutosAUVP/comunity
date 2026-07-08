@@ -12,8 +12,8 @@ import {
   Trash,
 } from '@phosphor-icons/react'
 import { useApp } from '../context/AppContext'
-import { FLAIRS, timeAgo } from '../data/mock'
-import { Avatar, Button, Card, FlairBadge, Modal, RoleLabel, TagPill, TurmaTag } from './ui'
+import { AREAS, timeAgo } from '../data/mock'
+import { AreaPill, Avatar, Button, Card, FlairBadge, Modal, RoleLabel, TagPill, TurmaTag } from './ui'
 import CoverArt from './CoverArt'
 
 export function VoteControl({ score, vote, onVote, vertical = true }) {
@@ -125,19 +125,19 @@ function ModTools({ post }) {
       <Modal open={moveOpen} onClose={() => setMoveOpen(false)} title="Mover tópico">
         <div onClick={stop}>
           <p className="mb-[15px] font-roboto text-[14px] text-muted-foreground">
-            Recategorize o tópico selecionando um novo flair institucional.
+            Mova o tópico para outra área (fórum) da comunidade.
           </p>
-          <div className="flex flex-wrap gap-[10px]">
-            {Object.keys(FLAIRS).map((f) => (
+          <div className="flex flex-wrap gap-[8px]">
+            {Object.entries(AREAS).map(([key, label]) => (
               <button
-                key={f}
+                key={key}
                 onClick={() => {
-                  movePost(post.id, f)
+                  movePost(post.id, key)
                   setMoveOpen(false)
                 }}
-                className={`rounded-[5px] border p-[4px] transition-all duration-240 ${f === post.flair ? 'border-accent' : 'border-transparent opacity-70 hover:opacity-100'}`}
+                className={`rounded-[5px] p-[2px] transition-all duration-240 ${key === post.area ? '' : 'opacity-70 hover:opacity-100'}`}
               >
-                <FlairBadge flair={f} />
+                <AreaPill label={label} active={key === post.area} />
               </button>
             ))}
           </div>
@@ -213,6 +213,7 @@ export default function PostCard({ post, compact = false }) {
           </div>
 
           <div className="mt-[10px] flex flex-wrap items-center gap-[8px]">
+            <AreaPill label={AREAS[post.area] || post.area} />
             <FlairBadge flair={post.flair} />
             <h3 className="font-anek text-[19px] md:text-[22px] font-semibold leading-[1.2] text-foreground">
               {post.title}

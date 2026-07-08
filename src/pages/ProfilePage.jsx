@@ -2,17 +2,22 @@ import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   Anchor,
+  Bird,
   Boat,
   ChatCircleText,
+  CompassRose,
   Eye,
+  FlagPennant,
   Lock,
   LockOpen,
   MapTrifold,
   Medal,
   SealCheck,
   ThumbsUp,
+  TreasureChest,
   Trophy,
   UserPlus,
+  Waves,
 } from '@phosphor-icons/react'
 import { useApp } from '../context/AppContext'
 import PostCard from '../components/PostCard'
@@ -64,60 +69,94 @@ function PiarPie({ data }) {
 }
 
 // Narrativa visual do progresso (Lore: barcos e ilhas) — seção de impacto,
-// sempre em fundo escuro independente do tema do app.
+// sempre em fundo escuro independente do tema do app. Visual lúdico:
+// bandeira tremulando, gaivotas cruzando o céu, bússola girando e um mar
+// de ondinhas animadas, para reforçar o tom de "aventura de navegação".
 function LoreJourney({ xp }) {
   const lore = loreForXp(xp)
+  const isMaxLevel = !lore.next
   return (
-    <div className="dark rounded-[12px] border border-border bg-card p-[20px] md:p-[30px]">
+    <div className="dark relative overflow-hidden rounded-[12px] border border-border bg-card p-[20px] md:p-[30px]">
+      <CompassRose
+        size={110}
+        weight="light"
+        className="animate-compass-spin pointer-events-none absolute -right-[10px] -top-[20px] text-foreground/[0.06]"
+        aria-hidden
+      />
+      <Bird size={18} weight="fill" className="animate-gull pointer-events-none absolute left-0 top-[18px] text-foreground/25" aria-hidden />
+      <Bird
+        size={13}
+        weight="fill"
+        className="animate-gull pointer-events-none absolute left-0 top-[34px] text-foreground/15"
+        style={{ animationDelay: '2.4s' }}
+        aria-hidden
+      />
+
       <Eyebrow>Jornada do Navegante</Eyebrow>
-      <div className="mt-[15px] flex flex-wrap items-center gap-[15px]">
-        <span className="flex h-[56px] w-[56px] items-center justify-center rounded-[12px] bg-muted">
+      <div className="relative mt-[15px] flex flex-wrap items-center gap-[15px]">
+        <span className="animate-boat-bob flex h-[56px] w-[56px] items-center justify-center rounded-[12px] bg-muted">
           <Boat size={30} weight="fill" className="text-accent" />
         </span>
         <div>
           <p className="font-anek text-[24px] font-semibold leading-tight text-foreground">
             {lore.boat} <span className="text-accent">· Nível {lore.level}</span>
           </p>
-          <p className="font-roboto text-[14px] text-muted-foreground">Ancorado na {lore.island}</p>
+          <p className="flex items-center gap-[6px] font-roboto text-[14px] text-muted-foreground">
+            <FlagPennant size={14} weight="fill" className="animate-flag-wave text-accent" /> Ancorado na {lore.island}
+          </p>
         </div>
       </div>
 
-      {/* Rota entre ilhas */}
-      <div className="mt-[30px] overflow-x-auto scrollbar-thin pb-[8px]">
+      {/* Rota entre ilhas, sobre um "mar" de ondinhas em looping */}
+      <div className="relative mt-[30px] overflow-x-auto scrollbar-thin pb-[8px]">
         <div className="flex min-w-[560px] items-center">
           {LORE_LEVELS.map((l, i) => {
             const reached = xp >= l.minXp
             const isCurrent = l.level === lore.level
             return (
               <div key={l.level} className="flex flex-1 items-center">
-                <div className="flex flex-col items-center gap-[6px]">
+                <div className="relative flex flex-col items-center gap-[6px]">
+                  {isCurrent && (
+                    <span className="animate-x-pulse pointer-events-none absolute -top-[6px] h-[46px] w-[46px] rounded-full border-2 border-accent" aria-hidden />
+                  )}
                   <span
-                    className={`flex h-[34px] w-[34px] items-center justify-center rounded-full border-[3px] border-background ${
+                    className={`relative flex h-[34px] w-[34px] items-center justify-center rounded-full border-[3px] border-background ${
                       isCurrent ? 'bg-accent' : reached ? 'bg-primary' : 'bg-muted'
                     }`}
                     title={l.island}
                   >
-                    <MapTrifold
-                      size={15}
-                      weight="fill"
-                      className={isCurrent ? 'text-accent-foreground' : reached ? 'text-primary-foreground' : 'text-muted-foreground'}
-                    />
+                    {isMaxLevel && l.level === lore.level ? (
+                      <TreasureChest size={16} weight="fill" className="text-accent-foreground" />
+                    ) : (
+                      <MapTrifold
+                        size={15}
+                        weight="fill"
+                        className={isCurrent ? 'text-accent-foreground' : reached ? 'text-primary-foreground' : 'text-muted-foreground'}
+                      />
+                    )}
                   </span>
                   <span className={`max-w-[90px] text-center font-roboto text-[10px] leading-tight ${reached ? 'text-foreground' : 'text-muted-foreground'}`}>
                     {l.island.replace('Ilha da ', '').replace('Ilha dos ', '').replace('Ilha das ', '')}
                   </span>
                 </div>
                 {i < LORE_LEVELS.length - 1 && (
-                  <div className={`mx-[4px] h-[3px] flex-1 ${xp >= LORE_LEVELS[i + 1].minXp ? 'bg-primary' : 'bg-border'}`} />
+                  <div className={`mx-[4px] h-[3px] flex-1 rounded-full border-t-2 border-dashed ${xp >= LORE_LEVELS[i + 1].minXp ? 'border-primary' : 'border-border'}`} />
                 )}
               </div>
             )
           })}
         </div>
+        <div className="mt-[10px] flex h-[16px] overflow-hidden opacity-40" aria-hidden>
+          <div className="animate-waves flex shrink-0" style={{ width: '200%' }}>
+            {Array.from({ length: 24 }).map((_, i) => (
+              <Waves key={i} size={22} weight="bold" className="shrink-0 text-accent" />
+            ))}
+          </div>
+        </div>
       </div>
 
-      {lore.next && (
-        <div className="mt-[20px]">
+      {lore.next ? (
+        <div className="relative mt-[20px]">
           <div className="mb-[6px] flex justify-between font-roboto text-[12px] text-muted-foreground">
             <span>
               {xp} XP · rumo à {lore.next.island}
@@ -126,6 +165,10 @@ function LoreJourney({ xp }) {
           </div>
           <ProgressBar value={lore.progress} />
         </div>
+      ) : (
+        <p className="relative mt-[20px] flex items-center gap-[8px] font-roboto text-[13px] text-accent">
+          <TreasureChest size={16} weight="fill" /> Tesouro encontrado! Você navegou por todo o arquipélago AUVP.
+        </p>
       )}
     </div>
   )

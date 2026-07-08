@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   ArrowBendUpLeft,
+  ArrowFatUp,
   ArrowLeft,
   CheckCircle,
   Flag,
@@ -12,8 +13,60 @@ import {
 import { useApp } from '../context/AppContext'
 import { VoteControl } from '../components/PostCard'
 import CoverArt from '../components/CoverArt'
-import { Avatar, Button, Card, EmptyState, FlairBadge, Modal, RoleLabel, TagPill, TurmaTag } from '../components/ui'
-import { REPORT_REASONS, timeAgo } from '../data/mock'
+import { AreaPill, Avatar, Button, Card, EmptyState, FlairBadge, Modal, RoleLabel, TagPill, TurmaTag } from '../components/ui'
+import { AREAS, REACTIONS, REPORT_REASONS, timeAgo } from '../data/mock'
+
+// Upvote-only: comentários não têm downvote (evita brigada anônima), só um
+// toggle de apoio, exibido ao lado do comentário como nos posts.
+function CommentUpvote({ score, active, onToggle }) {
+  return (
+    <div className="flex flex-col items-center gap-[4px]">
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          onToggle()
+        }}
+        aria-label="Apoiar comentário"
+        className={`rounded-[5px] p-[5px] transition-all duration-240 ${active ? 'text-primary bg-muted' : 'text-muted-foreground hover:text-primary'}`}
+      >
+        <ArrowFatUp size={16} weight={active ? 'fill' : 'bold'} />
+      </button>
+      <span className={`font-sora text-[13px] font-bold ${active ? 'text-primary' : 'text-foreground'}`}>{score}</span>
+    </div>
+  )
+}
+
+function ReactionBar({ commentId }) {
+  const { commentReactions, myReactions, toggleReaction } = useApp()
+  const counts = commentReactions[commentId] || {}
+  const mine = myReactions[commentId] || new Set()
+  return (
+    <div className="mt-[10px] flex flex-wrap gap-[6px]">
+      {REACTIONS.map((r) => {
+        const active = mine.has(r.key)
+        const count = counts[r.key] || 0
+        return (
+          <button
+            key={r.key}
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              toggleReaction(commentId, r.key)
+            }}
+            className={`rounded-[5px] border px-[8px] py-[3px] font-roboto text-[12px] transition-all duration-240 ${
+              active
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-border text-muted-foreground hover:border-primary hover:text-primary'
+            }`}
+          >
+            {r.label}
+            {count > 0 && <span className="ml-[4px] opacity-70">{count}</span>}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
 
 function buildTree(comments) {
   const byParent = {}
@@ -40,44 +93,46 @@ function CommentNode({ comment, byParent, post, depth, onReply, onReport }) {
       className={depth > 0 ? 'ml-[15px] border-l-2 border-border pl-[15px] md:ml-[20px] md:pl-[20px]' : ''}
     >
       <div
-        className={`rounded-[12px] p-[15px] bg-card border ${
+        className={`flex gap-[12px] rounded-[12px] p-[15px] bg-card border ${
           isSolution ? 'border-primary/40' : comment.validated ? 'border-accent/40' : 'border-border'
         }`}
       >
-        {(isSolution || comment.validated) && (
-          <div className="mb-[10px] flex flex-wrap gap-[8px]">
-            {isSolution && (
-              <span className="flex items-center gap-[4px] rounded-[4px] bg-primary/10 px-[8px] py-[3px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-primary">
-                <PushPin size={12} weight="fill" /> Solução do tópico
-              </span>
-            )}
-            {comment.validated && (
-              <span className="flex items-center gap-[4px] rounded-[4px] bg-accent/10 px-[8px] py-[3px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-accent">
-                <SealCheck size={12} weight="fill" /> Resposta Validada
-              </span>
-            )}
+        <CommentUpvote
+          score={comment.upvotes}
+          active={(commentVotes[comment.id] || 0) === 1}
+          onToggle={() => voteComment(comment.id, 1)}
+        />
+        <div className="min-w-0 flex-1">
+          {(isSolution || comment.validated) && (
+            <div className="mb-[10px] flex flex-wrap gap-[8px]">
+              {isSolution && (
+                <span className="flex items-center gap-[4px] rounded-[4px] bg-primary/10 px-[8px] py-[3px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-primary">
+                  <PushPin size={12} weight="fill" /> Solução do tópico
+                </span>
+              )}
+              {comment.validated && (
+                <span className="flex items-center gap-[4px] rounded-[4px] bg-accent/10 px-[8px] py-[3px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-accent">
+                  <SealCheck size={12} weight="fill" /> Resposta Validada
+                </span>
+              )}
+            </div>
+          )}
+
+          <div className="flex flex-wrap items-center gap-[8px]">
+            <Avatar user={author} size={28} />
+            <Link to={`/perfil/${author.id}`} className="font-roboto text-[13px] font-medium text-foreground hover:underline">
+              {author.nickname}
+            </Link>
+            <RoleLabel user={author} />
+            <TurmaTag turma={author.turma} />
+            <span className="font-roboto text-[12px] text-muted-foreground">· {timeAgo(comment.createdAt)}</span>
           </div>
-        )}
 
-        <div className="flex flex-wrap items-center gap-[8px]">
-          <Avatar user={author} size={28} />
-          <Link to={`/perfil/${author.id}`} className="font-roboto text-[13px] font-medium text-foreground hover:underline">
-            {author.nickname}
-          </Link>
-          <RoleLabel user={author} />
-          <TurmaTag turma={author.turma} />
-          <span className="font-roboto text-[12px] text-muted-foreground">· {timeAgo(comment.createdAt)}</span>
-        </div>
+          <p className="mt-[10px] font-roboto text-[15px] leading-[1.6] text-foreground">{comment.body}</p>
 
-        <p className="mt-[10px] font-roboto text-[15px] leading-[1.6] text-foreground">{comment.body}</p>
+          <ReactionBar commentId={comment.id} />
 
-        <div className="mt-[10px] flex flex-wrap items-center gap-[10px]">
-          <VoteControl
-            score={comment.upvotes}
-            vote={commentVotes[comment.id] || 0}
-            onVote={(dir) => voteComment(comment.id, dir)}
-            vertical={false}
-          />
+          <div className="mt-[10px] flex flex-wrap items-center gap-[10px]">
           <button
             onClick={() => onReply(comment)}
             className="flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-primary"
@@ -109,6 +164,7 @@ function CommentNode({ comment, byParent, post, depth, onReply, onReport }) {
           >
             <Flag size={14} weight="bold" /> Denunciar
           </button>
+          </div>
         </div>
       </div>
 
@@ -181,16 +237,19 @@ export default function PostDetailPage() {
             </div>
 
             <div className="mt-[15px] flex flex-wrap items-center gap-[8px]">
+              <AreaPill label={AREAS[post.area] || post.area} />
               <FlairBadge flair={post.flair} />
             </div>
             <h1 className="mt-[8px] font-anek text-[26px] md:text-[34px] font-semibold leading-[1.15] text-foreground">{post.title}</h1>
             <p className="mt-[15px] font-roboto text-[17px] leading-[1.6] text-foreground">{post.body}</p>
 
-            <div className="mt-[15px] flex flex-wrap gap-[8px]">
-              {post.tags.map((t) => (
-                <TagPill key={t} tag={t} />
-              ))}
-            </div>
+            {post.tags.length > 0 && (
+              <div className="mt-[15px] flex flex-wrap gap-[8px]">
+                {post.tags.map((t) => (
+                  <TagPill key={t} tag={t} />
+                ))}
+              </div>
+            )}
 
             {/* Aviso de pergunta respondida + ir para solução */}
             {post.solutionCommentId && (

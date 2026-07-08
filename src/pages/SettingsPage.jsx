@@ -38,7 +38,7 @@ const NOTIF_CATEGORIES = [
 ]
 
 export default function SettingsPage() {
-  const { currentUser, settings, updateSettings, requestNicknameChange } = useApp()
+  const { currentUser, settings, updateSettings, requestNicknameChange, toggleAuvpSempre } = useApp()
   const { theme, setTheme } = useTheme()
   const [nickname, setNickname] = useState('')
   const history = NICKNAME_HISTORY[currentUser.id] || []
@@ -165,6 +165,19 @@ export default function SettingsPage() {
               </button>
             ))}
           </div>
+        </div>
+      </Card>
+
+      {/* AUVP Sempre — elegibilidade do Programa de Conselheiros */}
+      <Card>
+        <Eyebrow>AUVP Sempre</Eyebrow>
+        <div className="mt-[10px] divide-y divide-border">
+          <Toggle
+            checked={!!currentUser.auvpSempreAtivo}
+            onChange={toggleAuvpSempre}
+            label="AUVP Sempre ativo (simulação)"
+            description="Controla a elegibilidade ao Programa de Conselheiros — alunos nas primeiras 8 semanas de Escola AUVP também têm acesso"
+          />
         </div>
       </Card>
 

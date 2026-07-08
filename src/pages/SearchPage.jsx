@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom'
 import { MagnifyingGlass } from '@phosphor-icons/react'
 import { useApp } from '../context/AppContext'
 import PostCard from '../components/PostCard'
-import { Avatar, Card, EmptyState, Eyebrow, RoleLabel, TagPill, TurmaTag } from '../components/ui'
-import { ALL_TAGS, FLAIRS, TURMAS } from '../data/mock'
+import { AreaPill, Avatar, Card, EmptyState, Eyebrow, RoleLabel, TagPill, TurmaTag } from '../components/ui'
+import { ALL_TAGS, AREAS, FLAIRS, TURMAS } from '../data/mock'
 
 const DATE_FILTERS = [
   { value: 'all', label: 'Qualquer data' },
@@ -16,6 +16,7 @@ const DATE_FILTERS = [
 export default function SearchPage() {
   const { posts, users } = useApp()
   const [query, setQuery] = useState('')
+  const [area, setArea] = useState(null)
   const [tags, setTags] = useState([])
   const [turma, setTurma] = useState(null)
   const [flair, setFlair] = useState(null)
@@ -30,6 +31,7 @@ export default function SearchPage() {
     const postResults = posts.filter((p) => {
       if (p.hidden) return false
       if (q && !`${p.title} ${p.body} ${p.tags.join(' ')}`.toLowerCase().includes(q)) return false
+      if (area && p.area !== area) return false
       if (tags.length && !tags.every((t) => p.tags.includes(t))) return false
       if (turma && p.turma !== turma) return false
       if (flair && p.flair !== flair) return false
@@ -44,9 +46,9 @@ export default function SearchPage() {
       : []
 
     return { postResults, userResults }
-  }, [query, tags, turma, flair, date, posts, users])
+  }, [query, area, tags, turma, flair, date, posts, users])
 
-  const hasFilters = query || tags.length || turma || flair || date !== 'all'
+  const hasFilters = query || area || tags.length || turma || flair || date !== 'all'
 
   return (
     <div className="flex flex-col gap-[15px]">
@@ -74,6 +76,16 @@ export default function SearchPage() {
 
         {/* Filtros rápidos em pílulas */}
         <div className="mt-[15px] flex flex-col gap-[15px]">
+          <div>
+            <p className="mb-[8px] font-sora text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Área</p>
+            <div className="flex flex-wrap gap-[8px]">
+              {Object.entries(AREAS).map(([key, label]) => (
+                <button key={key} onClick={() => setArea(area === key ? null : key)} className="rounded-[5px]">
+                  <AreaPill label={label} active={area === key} />
+                </button>
+              ))}
+            </div>
+          </div>
           <div>
             <p className="mb-[8px] font-sora text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Tags</p>
             <div className="flex flex-wrap gap-[8px]">

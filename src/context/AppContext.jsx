@@ -1,7 +1,9 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import {
   AUDIT_LOG,
+  COMMENT_REACTIONS,
   COMMENTS,
+  CONSELHEIRO_BOOKINGS,
   CONVERSATIONS,
   CURRENT_USER_ID,
   FRIEND_REQUESTS,
@@ -23,6 +25,8 @@ export function AppProvider({ children }) {
   const [comments, setComments] = useState(COMMENTS)
   const [postVotes, setPostVotes] = useState({ p3: 1, p11: 1 }) // votos do usuário atual
   const [commentVotes, setCommentVotes] = useState({ c3: 1 })
+  const [commentReactions, setCommentReactions] = useState(COMMENT_REACTIONS)
+  const [myReactions, setMyReactions] = useState({}) // { [commentId]: Set(reactionKey) }
   const [notifications, setNotifications] = useState(NOTIFICATIONS)
   const [conversations, setConversations] = useState(CONVERSATIONS)
   const [friendRequests, setFriendRequests] = useState(FRIEND_REQUESTS)
@@ -52,6 +56,7 @@ export function AppProvider({ children }) {
   // Modo de moderação inline: visualiza a comunidade normalmente, mas com
   // controles de moderação (editar/ocultar/mover/excluir) nos tópicos.
   const [moderationMode, setModerationMode] = useState(false)
+  const [conselheiroBookings, setConselheiroBookings] = useState(CONSELHEIRO_BOOKINGS)
 
   const currentUser = users[CURRENT_USER_ID]
 
@@ -80,9 +85,26 @@ export function AppProvider({ children }) {
     })
   }, [])
 
+  // Reações nomeadas de comentário — substituem o downvote (evita brigada
+  // anônima) sem tirar o espaço para reações espontâneas.
+  const toggleReaction = useCallback((commentId, key) => {
+    setMyReactions((mine) => {
+      const current = mine[commentId] || new Set()
+      const active = current.has(key)
+      const nextSet = new Set(current)
+      active ? nextSet.delete(key) : nextSet.add(key)
+      setCommentReactions((cr) => {
+        const counts = { ...(cr[commentId] || {}) }
+        counts[key] = Math.max(0, (counts[key] || 0) + (active ? -1 : 1))
+        return { ...cr, [commentId]: counts }
+      })
+      return { ...mine, [commentId]: nextSet }
+    })
+  }, [])
+
   // ── Posts e comentários ──────────────────────────────────────────────
   const createPost = useCallback(
-    ({ title, body, flair, tags }) => {
+    ({ title, body, flair, area, tags }) => {
       const id = nextId('p')
       const post = {
         id,
@@ -90,6 +112,7 @@ export function AppProvider({ children }) {
         title,
         body,
         flair,
+        area,
         tags,
         turma: currentUser.turma,
         createdAt: new Date().toISOString(),
@@ -166,6 +189,13 @@ export function AppProvider({ children }) {
     },
     [toast],
   )
+
+  const toggleAuvpSempre = useCallback(() => {
+    setUsers((us) => ({
+      ...us,
+      [CURRENT_USER_ID]: { ...us[CURRENT_USER_ID], auvpSempreAtivo: !us[CURRENT_USER_ID].auvpSempreAtivo },
+    }))
+  }, [])
 
   // ── Rede social ──────────────────────────────────────────────────────
   const toggleFollow = useCallback(
@@ -428,10 +458,10 @@ export function AppProvider({ children }) {
   )
 
   const movePost = useCallback(
-    (postId, newFlair) => {
-      setPosts((ps) => ps.map((p) => (p.id === postId ? { ...p, flair: newFlair } : p)))
-      logAction('Mover Tópico', '-', `Post ${postId} → ${newFlair}`, 'Recategorização pela moderação', false)
-      toast(`Tópico movido para a categoria "${newFlair}".`)
+    (postId, newArea) => {
+      setPosts((ps) => ps.map((p) => (p.id === postId ? { ...p, area: newArea } : p)))
+      logAction('Mover Tópico', '-', `Post ${postId} → ${newArea}`, 'Recategorização pela moderação', false)
+      toast(`Tópico movido para a área "${newArea}".`)
     },
     [logAction, toast],
   )
@@ -447,6 +477,38 @@ export function AppProvider({ children }) {
     [logAction, toast],
   )
 
+  // ── Programa de Conselheiros (conversas 1:1 agendadas) ────────────────
+  let bookingSeq = 100
+  const bookMeeting = useCallback((conselheiroId, slot) => {
+    const id = `bk${bookingSeq++}`
+    const booking = {
+      id,
+      conselheiroId,
+      status: 'agendado',
+      at: slot.at,
+      meetLink: `https://meet.google.com/mock-${id}`,
+    }
+    setConselheiroBookings((bs) => [booking, ...bs])
+    toast(`Conversa agendada para ${slot.label}. Lembrete automático enviado e link do Google Meet gerado.`)
+    return id
+  }, [toast])
+
+  const cancelBooking = useCallback(
+    (bookingId) => {
+      setConselheiroBookings((bs) => bs.map((b) => (b.id === bookingId ? { ...b, status: 'cancelado' } : b)))
+      toast('Conversa cancelada.', 'info')
+    },
+    [toast],
+  )
+
+  const submitCsat = useCallback(
+    (bookingId, rating, comment) => {
+      setConselheiroBookings((bs) => bs.map((b) => (b.id === bookingId ? { ...b, csat: { rating, comment } } : b)))
+      toast('Obrigado pela avaliação! Isso ajuda o conselheiro e a curadoria do programa.')
+    },
+    [toast],
+  )
+
   const value = useMemo(
     () => ({
       users,
@@ -455,6 +517,9 @@ export function AppProvider({ children }) {
       comments,
       postVotes,
       commentVotes,
+      commentReactions,
+      myReactions,
+      toggleReaction,
       notifications,
       conversations,
       friendRequests,
@@ -474,6 +539,11 @@ export function AppProvider({ children }) {
       togglePostHidden,
       movePost,
       deletePost,
+      conselheiroBookings,
+      bookMeeting,
+      cancelBooking,
+      submitCsat,
+      toggleAuvpSempre,
       toast,
       votePost,
       voteComment,
@@ -500,10 +570,12 @@ export function AppProvider({ children }) {
       notifyCounselor,
     }),
     [
-      users, currentUser, posts, comments, postVotes, commentVotes, notifications, conversations,
+      users, currentUser, posts, comments, postVotes, commentVotes, commentReactions, myReactions,
+      toggleReaction, notifications, conversations,
       friendRequests, blockedUsers, dmSentToday, reports, nicknameQueue, auditLog, sanctions,
       settings, toasts, liveDismissed, moderationMode, toggleModerationMode, editPost,
-      togglePostHidden, movePost, deletePost, toast, votePost, voteComment, createPost, addComment,
+      togglePostHidden, movePost, deletePost, conselheiroBookings, bookMeeting, cancelBooking,
+      submitCsat, toggleAuvpSempre, toast, votePost, voteComment, createPost, addComment,
       markSolution, validateAnswer, reportContent, toggleFollow, acceptFriendRequest,
       declineFriendRequest, sendMessage, moveToPrincipal, blockUser, markNotificationsRead,
       markNotificationRead, updateSettings, requestNicknameChange, resolveReport,

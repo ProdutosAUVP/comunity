@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import {
   Bell,
   ChatsCircle,
+  Compass,
   GearSix,
   House,
   List,
@@ -24,6 +25,7 @@ import AuvpLogo from './AuvpLogo'
 const NAV = [
   { to: '/', label: 'Hub da Comunidade', icon: House, end: true },
   { to: '/busca', label: 'Busca Avançada', icon: MagnifyingGlass },
+  { to: '/conselheiros', label: 'Conselheiros', icon: Compass },
   { to: '/conexoes', label: 'Conexões', icon: UsersThree },
   { to: '/mensagens', label: 'Mensagens', icon: ChatsCircle },
   { to: '/notificacoes', label: 'Notificações', icon: Bell },
@@ -59,7 +61,7 @@ export default function Layout({ children }) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Barra superior — efeito glass sutil (fundo translúcido + blur) */}
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/70 backdrop-blur-md">
+      <header className="sticky top-0 lg:top-[40px] z-40 border-b border-border/60 bg-background/70 backdrop-blur-md">
         <div className="mx-auto flex h-[64px] max-w-[1200px] items-center gap-[15px] px-6">
           {/* Menu hamburguer (mobile) — a navegação inferior não é usada aqui
               porque a Comunidade roda embutida no SuperApp, que já tem sua
@@ -121,7 +123,7 @@ export default function Layout({ children }) {
       <div className="mx-auto flex max-w-[1200px] gap-[30px] px-6 py-[30px]">
         {/* Navegação lateral (desktop) */}
         <nav className="hidden lg:block w-[240px] shrink-0" aria-label="Navegação principal">
-          <div className="sticky top-[94px] flex flex-col gap-[4px]">
+          <div className="sticky top-[94px] lg:top-[134px] flex flex-col gap-[4px]">
             {NAV.map(({ to, label, icon: Icon, end }) => (
               <NavLink key={to} to={to} end={end} className={navLinkCls}>
                 <Icon size={18} weight="bold" />
@@ -169,7 +171,7 @@ export default function Layout({ children }) {
       <Link
         to="/novo-post"
         aria-label="Criar nova publicação"
-        className="fixed bottom-[74px] right-[20px] z-40 flex h-[64px] w-[64px] items-center justify-center rounded-full bg-primary text-primary-foreground shadow-auvp-card transition-all duration-240 hover:opacity-90 animate-pulse-ring"
+        className="fixed bottom-[74px] lg:bottom-[24px] right-[20px] z-40 flex h-[64px] w-[64px] items-center justify-center rounded-full bg-primary text-primary-foreground shadow-auvp-card transition-all duration-240 hover:opacity-90 animate-pulse-ring"
       >
         <Plus size={26} weight="bold" />
       </Link>
