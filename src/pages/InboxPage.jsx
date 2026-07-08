@@ -25,8 +25,8 @@ export default function InboxPage() {
     <div className="flex flex-col gap-[15px]">
       <div>
         <Eyebrow>Mensagens Diretas</Eyebrow>
-        <h1 className="mt-[4px] font-anek text-[30px] md:text-[41px] font-semibold leading-[1.15] text-auvp-green">Inbox</h1>
-        <p className="mt-[8px] font-roboto text-[14px] text-auvp-gray-mid">
+        <h1 className="mt-[4px] font-anek text-[30px] md:text-[41px] font-semibold leading-[1.15] text-foreground">Inbox</h1>
+        <p className="mt-[8px] font-roboto text-[14px] text-muted-foreground">
           Limite anti-spam: {dmSentToday}/{DM_DAILY_LIMIT} mensagens enviadas hoje. Mensagens de moderadores chegam sempre na
           caixa Principal.
         </p>
@@ -48,7 +48,7 @@ export default function InboxPage() {
         {/* Lista de conversas */}
         <Card className="!p-[10px]">
           {boxConversations.length === 0 && (
-            <p className="p-[15px] font-roboto text-[14px] text-auvp-gray-mid">Nenhuma conversa nesta caixa.</p>
+            <p className="p-[15px] font-roboto text-[14px] text-muted-foreground">Nenhuma conversa nesta caixa.</p>
           )}
           {boxConversations.map((c) => {
             const u = users[c.withId]
@@ -59,15 +59,15 @@ export default function InboxPage() {
                 key={c.id}
                 onClick={() => setActiveId(c.id)}
                 className={`flex w-full items-center gap-[10px] rounded-[8px] p-[12px] text-left transition-all duration-240 ${
-                  isActive ? 'bg-auvp-green text-white' : 'hover:bg-auvp-gray'
+                  isActive ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
                 }`}
               >
                 <Avatar user={u} size={40} />
                 <span className="min-w-0 flex-1">
-                  <span className={`block truncate font-roboto text-[14px] font-medium ${isActive ? 'text-white' : 'text-auvp-chumbo'}`}>
+                  <span className={`block truncate font-roboto text-[14px] font-medium ${isActive ? 'text-primary-foreground' : 'text-foreground'}`}>
                     {u.nickname}
                   </span>
-                  <span className={`block truncate font-roboto text-[12px] ${isActive ? 'text-white/70' : 'text-auvp-gray-mid'}`}>
+                  <span className={`block truncate font-roboto text-[12px] ${isActive ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                     {last?.text}
                   </span>
                 </span>
@@ -79,10 +79,10 @@ export default function InboxPage() {
         {/* Chat */}
         {active ? (
           <Card className="flex min-h-[440px] flex-col !p-[15px]">
-            <div className="flex items-center gap-[10px] border-b border-black/[0.08] pb-[12px]">
+            <div className="flex items-center gap-[10px] border-b border-border pb-[12px]">
               <Avatar user={users[active.withId]} size={36} />
               <div className="min-w-0 flex-1">
-                <p className="font-roboto text-[15px] font-medium text-auvp-chumbo">{users[active.withId].nickname}</p>
+                <p className="font-roboto text-[15px] font-medium text-foreground">{users[active.withId].nickname}</p>
                 <RoleLabel user={users[active.withId]} />
               </div>
               <button
@@ -95,21 +95,21 @@ export default function InboxPage() {
                     excerpt: active.messages[active.messages.length - 1]?.text || '',
                   })
                 }
-                className="flex items-center gap-[4px] rounded-[5px] px-[8px] py-[6px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-auvp-gray-mid transition-all duration-240 hover:text-[#B42318]"
+                className="flex items-center gap-[4px] rounded-[5px] px-[8px] py-[6px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-destructive"
               >
                 <Flag size={14} weight="bold" /> Denunciar
               </button>
               <button
                 onClick={() => setConfirmBlock(active.withId)}
-                className="flex items-center gap-[4px] rounded-[5px] px-[8px] py-[6px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-auvp-gray-mid transition-all duration-240 hover:text-[#B42318]"
+                className="flex items-center gap-[4px] rounded-[5px] px-[8px] py-[6px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-destructive"
               >
                 <Prohibit size={14} weight="bold" /> Bloquear
               </button>
             </div>
 
             {active.box === 'solicitacoes' && (
-              <div className="mt-[12px] flex flex-wrap items-center gap-[10px] rounded-[8px] bg-auvp-gray p-[12px]">
-                <p className="min-w-0 flex-1 font-roboto text-[13px] text-auvp-gray-mid">
+              <div className="mt-[12px] flex flex-wrap items-center gap-[10px] rounded-[8px] bg-muted p-[12px]">
+                <p className="min-w-0 flex-1 font-roboto text-[13px] text-muted-foreground">
                   Vocês não são amigos. Aceite para mover a conversa para a caixa Principal.
                 </p>
                 <Button size="xs" onClick={() => moveToPrincipal(active.id)}>
@@ -123,23 +123,23 @@ export default function InboxPage() {
                 const mine = m.fromId === currentUser.id
                 return (
                   <div key={m.id} className={`max-w-[75%] ${mine ? 'self-end' : 'self-start'}`}>
-                    <div className={`rounded-[12px] px-[15px] py-[10px] font-roboto text-[15px] ${mine ? 'bg-auvp-green text-white' : 'bg-auvp-gray text-auvp-chumbo'}`}>
+                    <div className={`rounded-[12px] px-[15px] py-[10px] font-roboto text-[15px] ${mine ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'}`}>
                       {m.text}
                     </div>
-                    <p className={`mt-[2px] font-roboto text-[11px] text-auvp-gray-mid ${mine ? 'text-right' : ''}`}>{timeAgo(m.createdAt)}</p>
+                    <p className={`mt-[2px] font-roboto text-[11px] text-muted-foreground ${mine ? 'text-right' : ''}`}>{timeAgo(m.createdAt)}</p>
                   </div>
                 )
               })}
             </div>
 
-            <form onSubmit={submit} className="flex gap-[10px] border-t border-black/[0.08] pt-[12px]">
+            <form onSubmit={submit} className="flex gap-[10px] border-t border-border pt-[12px]">
               <input
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Escreva uma mensagem…"
                 aria-label="Escrever mensagem"
                 disabled={active.box === 'solicitacoes'}
-                className="min-w-0 flex-1 rounded-[5px] border border-black/15 px-[15px] py-[10px] font-roboto text-[15px] outline-none transition-all duration-240 focus:border-auvp-green disabled:opacity-50"
+                className="min-w-0 flex-1 rounded-[5px] border border-border bg-background px-[15px] py-[10px] font-roboto text-[15px] text-foreground outline-none transition-all duration-240 focus:border-primary disabled:opacity-50"
               />
               <Button size="sm" type="submit" disabled={!text.trim() || active.box === 'solicitacoes'} aria-label="Enviar mensagem">
                 <PaperPlaneRight size={16} weight="bold" />
@@ -153,7 +153,7 @@ export default function InboxPage() {
 
       {/* Popconfirm de bloqueio */}
       <Modal open={!!confirmBlock} onClose={() => setConfirmBlock(null)} title="Bloquear usuário?">
-        <p className="font-roboto text-[15px] text-auvp-gray-mid">
+        <p className="font-roboto text-[15px] text-muted-foreground">
           {confirmBlock && users[confirmBlock]?.nickname} não poderá mais enviar mensagens nem interagir com você. Essa ação
           pode ser revertida nas configurações.
         </p>

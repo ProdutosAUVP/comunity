@@ -52,22 +52,22 @@ export default function SearchPage() {
     <div className="flex flex-col gap-[15px]">
       <div>
         <Eyebrow>Descoberta e Organização</Eyebrow>
-        <h1 className="mt-[4px] font-anek text-[30px] md:text-[41px] font-semibold leading-[1.15] text-auvp-green">Busca Avançada</h1>
-        <p className="mt-[8px] font-roboto text-[16px] text-auvp-gray-mid">
+        <h1 className="mt-[4px] font-anek text-[30px] md:text-[41px] font-semibold leading-[1.15] text-foreground">Busca Avançada</h1>
+        <p className="mt-[8px] font-roboto text-[16px] text-muted-foreground">
           Pesquise por posts, tópicos, usuários, grupos, tags, turmas e datas.
         </p>
       </div>
 
       <Card className="!p-[20px]">
-        <label className="flex items-center gap-[10px] rounded-[5px] border border-black/15 px-[15px] py-[12px] focus-within:border-auvp-green transition-all duration-240">
-          <MagnifyingGlass size={18} weight="bold" className="text-auvp-gray-mid" />
+        <label className="flex items-center gap-[10px] rounded-[5px] border border-border px-[15px] py-[12px] focus-within:border-primary transition-all duration-240">
+          <MagnifyingGlass size={18} weight="bold" className="text-muted-foreground" />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="O que você procura?"
             aria-label="Termo de busca"
-            className="w-full bg-transparent font-roboto text-[16px] outline-none placeholder:text-auvp-gray-mid"
+            className="w-full bg-transparent font-roboto text-[16px] outline-none placeholder:text-muted-foreground"
             autoFocus
           />
         </label>
@@ -75,7 +75,7 @@ export default function SearchPage() {
         {/* Filtros rápidos em pílulas */}
         <div className="mt-[15px] flex flex-col gap-[15px]">
           <div>
-            <p className="mb-[8px] font-sora text-[11px] font-bold uppercase tracking-[0.15em] text-auvp-green">Tags</p>
+            <p className="mb-[8px] font-sora text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Tags</p>
             <div className="flex flex-wrap gap-[8px]">
               {ALL_TAGS.map((t) => (
                 <TagPill key={t} tag={t} active={tags.includes(t)} onClick={() => toggleTag(t)} />
@@ -84,14 +84,14 @@ export default function SearchPage() {
           </div>
           <div className="flex flex-wrap gap-[30px]">
             <div>
-              <p className="mb-[8px] font-sora text-[11px] font-bold uppercase tracking-[0.15em] text-auvp-green">Turma</p>
+              <p className="mb-[8px] font-sora text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Turma</p>
               <div className="flex flex-wrap gap-[8px]">
                 {TURMAS.map((t) => (
                   <button
                     key={t}
                     onClick={() => setTurma(turma === t ? null : t)}
                     className={`rounded-[4px] border px-[10px] py-[3px] font-roboto text-[13px] transition-all duration-240 ${
-                      turma === t ? 'bg-auvp-green text-white border-auvp-green' : 'bg-white text-auvp-gray-mid border-black/10 hover:border-auvp-green'
+                      turma === t ? 'bg-primary text-primary-foreground border-primary' : 'bg-background text-muted-foreground border-border hover:border-primary hover:text-primary'
                     }`}
                   >
                     {t}
@@ -100,14 +100,14 @@ export default function SearchPage() {
               </div>
             </div>
             <div>
-              <p className="mb-[8px] font-sora text-[11px] font-bold uppercase tracking-[0.15em] text-auvp-green">Flair</p>
+              <p className="mb-[8px] font-sora text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Flair</p>
               <div className="flex flex-wrap gap-[8px]">
                 {Object.keys(FLAIRS).map((f) => (
                   <button
                     key={f}
                     onClick={() => setFlair(flair === f ? null : f)}
                     className={`rounded-[4px] border px-[10px] py-[3px] font-roboto text-[13px] transition-all duration-240 ${
-                      flair === f ? 'bg-auvp-green text-white border-auvp-green' : 'bg-white text-auvp-gray-mid border-black/10 hover:border-auvp-green'
+                      flair === f ? 'bg-primary text-primary-foreground border-primary' : 'bg-background text-muted-foreground border-border hover:border-primary hover:text-primary'
                     }`}
                   >
                     {f}
@@ -116,14 +116,14 @@ export default function SearchPage() {
               </div>
             </div>
             <div>
-              <p className="mb-[8px] font-sora text-[11px] font-bold uppercase tracking-[0.15em] text-auvp-green">Data</p>
+              <p className="mb-[8px] font-sora text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Data</p>
               <div className="flex flex-wrap gap-[8px]">
                 {DATE_FILTERS.map((d) => (
                   <button
                     key={d.value}
                     onClick={() => setDate(d.value)}
                     className={`rounded-[4px] border px-[10px] py-[3px] font-roboto text-[13px] transition-all duration-240 ${
-                      date === d.value ? 'bg-auvp-green text-white border-auvp-green' : 'bg-white text-auvp-gray-mid border-black/10 hover:border-auvp-green'
+                      date === d.value ? 'bg-primary text-primary-foreground border-primary' : 'bg-background text-muted-foreground border-border hover:border-primary hover:text-primary'
                     }`}
                   >
                     {d.label}
@@ -138,8 +138,8 @@ export default function SearchPage() {
       {/* Resultados categorizados por tipo */}
       {userResults.length > 0 && (
         <section aria-label="Usuários encontrados">
-          <h2 className="mb-[10px] font-anek text-[22px] font-semibold text-auvp-green">
-            Usuários <span className="font-roboto text-[14px] font-normal text-auvp-gray-mid">({userResults.length})</span>
+          <h2 className="mb-[10px] font-anek text-[22px] font-semibold text-foreground">
+            Usuários <span className="font-roboto text-[14px] font-normal text-muted-foreground">({userResults.length})</span>
           </h2>
           <div className="grid gap-[15px] sm:grid-cols-2">
             {userResults.map((u) => (
@@ -148,7 +148,7 @@ export default function SearchPage() {
                   <div className="flex items-center gap-[10px]">
                     <Avatar user={u} size={40} />
                     <div className="min-w-0">
-                      <p className="truncate font-roboto text-[15px] font-medium text-auvp-chumbo">{u.nickname}</p>
+                      <p className="truncate font-roboto text-[15px] font-medium text-foreground">{u.nickname}</p>
                       <div className="mt-[2px] flex items-center gap-[6px]">
                         <TurmaTag turma={u.turma} />
                         <RoleLabel user={u} />
@@ -163,8 +163,8 @@ export default function SearchPage() {
       )}
 
       <section aria-label="Tópicos encontrados">
-        <h2 className="mb-[10px] font-anek text-[22px] font-semibold text-auvp-green">
-          Tópicos <span className="font-roboto text-[14px] font-normal text-auvp-gray-mid">({postResults.length})</span>
+        <h2 className="mb-[10px] font-anek text-[22px] font-semibold text-foreground">
+          Tópicos <span className="font-roboto text-[14px] font-normal text-muted-foreground">({postResults.length})</span>
         </h2>
         <div className="flex flex-col gap-[15px]">
           {postResults.length === 0 ? (

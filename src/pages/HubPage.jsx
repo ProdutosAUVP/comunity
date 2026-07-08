@@ -36,7 +36,7 @@ export default function HubPage() {
     <div className="flex flex-col gap-[15px]">
       <div>
         <Eyebrow>Comunidade AUVP</Eyebrow>
-        <h1 className="mt-[4px] font-anek text-[30px] md:text-[41px] font-semibold leading-[1.15] text-auvp-green">
+        <h1 className="mt-[4px] font-anek text-[30px] md:text-[41px] font-semibold leading-[1.15] text-foreground">
           Hub da Comunidade
         </h1>
       </div>

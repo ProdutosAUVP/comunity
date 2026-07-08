@@ -24,9 +24,9 @@ export default function NotificationsPage() {
       <div className="flex flex-wrap items-end justify-between gap-[15px]">
         <div>
           <Eyebrow>Central de Notificações</Eyebrow>
-          <h1 className="mt-[4px] font-anek text-[30px] md:text-[41px] font-semibold leading-[1.15] text-auvp-green">Notificações</h1>
+          <h1 className="mt-[4px] font-anek text-[30px] md:text-[41px] font-semibold leading-[1.15] text-foreground">Notificações</h1>
           {settings.dnd && (
-            <p className="mt-[6px] font-roboto text-[13px] text-auvp-gray-mid">
+            <p className="mt-[6px] font-roboto text-[13px] text-muted-foreground">
               Modo "não perturbe" ativo — novos alertas ficam silenciados conforme suas preferências.
             </p>
           )}
@@ -40,7 +40,7 @@ export default function NotificationsPage() {
           <Link
             to="/configuracoes"
             aria-label="Configurações de notificação"
-            className="rounded-[5px] border border-black/10 bg-white p-[10px] text-auvp-gray-mid transition-all duration-240 hover:text-auvp-green hover:border-auvp-green"
+            className="rounded-[5px] border border-border bg-card p-[10px] text-muted-foreground transition-all duration-240 hover:text-primary hover:border-primary"
           >
             <GearSix size={18} weight="bold" />
           </Link>
@@ -56,18 +56,18 @@ export default function NotificationsPage() {
               key={n.id}
               to={n.link}
               onClick={() => markNotificationRead(n.id)}
-              className={`flex items-start gap-[12px] rounded-[8px] p-[15px] transition-all duration-240 hover:bg-auvp-gray ${n.read ? '' : 'bg-auvp-gray/60'}`}
+              className={`flex items-start gap-[12px] rounded-[8px] p-[15px] transition-all duration-240 hover:bg-muted ${n.read ? '' : 'bg-muted/60'}`}
             >
-              <span className={`mt-[2px] flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-full ${n.read ? 'bg-auvp-gray text-auvp-gray-mid' : 'bg-auvp-green text-white'}`}>
+              <span className={`mt-[2px] flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-full ${n.read ? 'bg-muted text-muted-foreground' : 'bg-primary/10 text-primary'}`}>
                 <Icon size={17} weight="bold" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className={`block font-roboto text-[15px] leading-[1.5] ${n.read ? 'text-auvp-gray-mid' : 'text-auvp-chumbo font-medium'}`}>
+                <span className={`block font-roboto text-[15px] leading-[1.5] ${n.read ? 'text-muted-foreground' : 'text-foreground font-medium'}`}>
                   {n.text}
                 </span>
-                <span className="mt-[2px] block font-roboto text-[12px] text-auvp-gray-mid">{timeAgo(n.createdAt)}</span>
+                <span className="mt-[2px] block font-roboto text-[12px] text-muted-foreground">{timeAgo(n.createdAt)}</span>
               </span>
-              {!n.read && <span className="mt-[6px] h-[9px] w-[9px] shrink-0 rounded-full bg-auvp-yellow" aria-label="Não lida" />}
+              {!n.read && <span className="mt-[6px] h-[9px] w-[9px] shrink-0 rounded-full bg-primary" aria-label="Não lida" />}
             </Link>
           )
         })}

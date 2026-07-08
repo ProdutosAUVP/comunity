@@ -19,15 +19,15 @@ function TrendChart({ data }) {
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Tendência de denúncias versus postagens nos últimos 7 dias">
       {[0.25, 0.5, 0.75, 1].map((f) => (
-        <line key={f} x1={pad} x2={W - pad} y1={H - pad - f * (H - pad * 2)} y2={H - pad - f * (H - pad * 2)} stroke="rgba(255,255,255,0.08)" />
+        <line key={f} x1={pad} x2={W - pad} y1={H - pad - f * (H - pad * 2)} y2={H - pad - f * (H - pad * 2)} stroke="hsl(var(--border))" />
       ))}
-      <path d={line((d) => d.posts, yPosts)} fill="none" stroke="#EFBE4F" strokeWidth="2.5" />
-      <path d={line((d) => d.reports, yReports)} fill="none" stroke="#E5484D" strokeWidth="2.5" />
+      <path d={line((d) => d.posts, yPosts)} fill="none" stroke="hsl(var(--accent))" strokeWidth="2.5" />
+      <path d={line((d) => d.reports, yReports)} fill="none" stroke="hsl(var(--destructive))" strokeWidth="2.5" />
       {data.map((d, i) => (
         <g key={d.day}>
-          <circle cx={x(i)} cy={yPosts(d.posts)} r="4" fill="#EFBE4F" />
-          <circle cx={x(i)} cy={yReports(d.reports)} r="4" fill="#E5484D" />
-          <text x={x(i)} y={H - 8} textAnchor="middle" fill="#6B6B6B" fontSize="11" fontFamily="Roboto, sans-serif">
+          <circle cx={x(i)} cy={yPosts(d.posts)} r="4" fill="hsl(var(--accent))" />
+          <circle cx={x(i)} cy={yReports(d.reports)} r="4" fill="hsl(var(--destructive))" />
+          <text x={x(i)} y={H - 8} textAnchor="middle" fill="hsl(var(--muted-foreground))" fontSize="11" fontFamily="Roboto, sans-serif">
             {d.day}
           </text>
         </g>
@@ -47,33 +47,33 @@ export default function ModOverview() {
   return (
     <div className="flex flex-col gap-[30px]">
       <div>
-        <Eyebrow dark>Tela M-01</Eyebrow>
-        <h1 className="mt-[4px] font-anek text-[30px] md:text-[41px] font-semibold leading-[1.15] text-white">
+        <Eyebrow>Tela M-01</Eyebrow>
+        <h1 className="mt-[4px] font-anek text-[30px] md:text-[41px] font-semibold leading-[1.15] text-foreground">
           Painel Principal · Visão Geral
         </h1>
-        <p className="mt-[8px] font-roboto text-[15px] text-auvp-gray-mid">
+        <p className="mt-[8px] font-roboto text-[15px] text-muted-foreground">
           Saúde operacional e SLAs. Clique em um contador para abrir a fila correspondente já filtrada.
         </p>
       </div>
 
       {/* Contadores de urgência em destaque vermelho */}
       <div className="grid gap-[15px] sm:grid-cols-2 lg:grid-cols-4">
-        <Stat dark urgent label="Denúncias pendentes" value={pending.length} onClick={() => navigate('/moderacao/denuncias')} />
-        <Stat dark urgent label="Sem tratamento há mais de 4h" value={overdue.length} onClick={() => navigate('/moderacao/denuncias')} />
-        <Stat dark urgent label="Apelidos aguardando aprovação" value={pendingNicks.length} onClick={() => navigate('/moderacao/usuarios')} />
-        <Stat dark label="Tempo médio de 1ª resposta" value={`${MOD_METRICS.avgFirstResponseMin} min`} />
+        <Stat urgent label="Denúncias pendentes" value={pending.length} onClick={() => navigate('/moderacao/denuncias')} />
+        <Stat urgent label="Sem tratamento há mais de 4h" value={overdue.length} onClick={() => navigate('/moderacao/denuncias')} />
+        <Stat urgent label="Apelidos aguardando aprovação" value={pendingNicks.length} onClick={() => navigate('/moderacao/usuarios')} />
+        <Stat label="Tempo médio de 1ª resposta" value={`${MOD_METRICS.avgFirstResponseMin} min`} />
       </div>
 
       {/* Gráfico de tendência — exclusivo desktop */}
-      <div className="hidden rounded-[12px] border border-white/10 bg-auvp-chumbo p-[30px] md:block">
+      <div className="hidden rounded-[12px] border border-border bg-card p-[30px] md:block">
         <div className="flex flex-wrap items-center justify-between gap-[15px]">
-          <Eyebrow dark>Tendência · denúncias vs. postagens (7 dias)</Eyebrow>
+          <Eyebrow>Tendência · denúncias vs. postagens (7 dias)</Eyebrow>
           <div className="flex gap-[20px] font-roboto text-[13px]">
-            <span className="flex items-center gap-[6px] text-auvp-gray">
-              <span className="h-[10px] w-[10px] rounded-full bg-auvp-yellow" /> Postagens
+            <span className="flex items-center gap-[6px] text-muted-foreground">
+              <span className="h-[10px] w-[10px] rounded-full bg-accent" /> Postagens
             </span>
-            <span className="flex items-center gap-[6px] text-auvp-gray">
-              <span className="h-[10px] w-[10px] rounded-full bg-[#E5484D]" /> Denúncias
+            <span className="flex items-center gap-[6px] text-muted-foreground">
+              <span className="h-[10px] w-[10px] rounded-full bg-destructive" /> Denúncias
             </span>
           </div>
         </div>
@@ -83,22 +83,22 @@ export default function ModOverview() {
       </div>
 
       {/* Log das últimas 5 ações da equipe */}
-      <div className="rounded-[12px] border border-white/10 bg-auvp-chumbo p-[20px] md:p-[30px]">
-        <Eyebrow dark>Últimas 5 ações da equipe</Eyebrow>
-        <ul className="mt-[15px] divide-y divide-white/[0.06]">
+      <div className="rounded-[12px] border border-border bg-card p-[20px] md:p-[30px]">
+        <Eyebrow>Últimas 5 ações da equipe</Eyebrow>
+        <ul className="mt-[15px] divide-y divide-border">
           {auditLog.slice(0, 5).map((a) => (
             <li key={a.id} className="flex flex-wrap items-center gap-[10px] py-[12px]">
-              <span className="rounded-[4px] bg-auvp-green px-[8px] py-[2px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-white">
+              <span className="rounded-[4px] bg-accent/10 px-[8px] py-[2px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-accent">
                 {a.action}
               </span>
-              <span className="min-w-0 flex-1 font-roboto text-[14px] text-auvp-gray">
+              <span className="min-w-0 flex-1 font-roboto text-[14px] text-foreground">
                 {users[a.moderatorId]?.nickname} → {a.targetUserId !== '-' ? users[a.targetUserId]?.nickname || a.targetUserId : a.targetRef} · {a.reason}
               </span>
-              <span className="font-roboto text-[12px] text-auvp-gray-mid">{timeAgo(a.date)}</span>
+              <span className="font-roboto text-[12px] text-muted-foreground">{timeAgo(a.date)}</span>
             </li>
           ))}
         </ul>
-        <p className="mt-[15px] border-t border-white/10 pt-[15px] font-roboto text-[13px] text-auvp-gray-mid">
+        <p className="mt-[15px] border-t border-border pt-[15px] font-roboto text-[13px] text-muted-foreground">
           Regra de acesso: conselheiros visualizam apenas o painel técnico de respostas (M-04); moderadores oficiais têm
           acesso completo.
         </p>

@@ -36,22 +36,22 @@ function CommentNode({ comment, byParent, post, depth, onReply, onReport }) {
   return (
     <div
       id={`comment-${comment.id}`}
-      className={depth > 0 ? 'ml-[15px] border-l-2 border-black/[0.08] pl-[15px] md:ml-[20px] md:pl-[20px]' : ''}
+      className={depth > 0 ? 'ml-[15px] border-l-2 border-border pl-[15px] md:ml-[20px] md:pl-[20px]' : ''}
     >
       <div
-        className={`rounded-[12px] p-[15px] ${
-          isSolution ? 'border-2 border-auvp-green bg-white' : comment.validated ? 'border border-auvp-yellow bg-white' : 'bg-white border border-black/[0.06]'
+        className={`rounded-[12px] p-[15px] bg-card border ${
+          isSolution ? 'border-primary/40' : comment.validated ? 'border-accent/40' : 'border-border'
         }`}
       >
         {(isSolution || comment.validated) && (
           <div className="mb-[10px] flex flex-wrap gap-[8px]">
             {isSolution && (
-              <span className="flex items-center gap-[4px] rounded-[4px] bg-auvp-green px-[8px] py-[3px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-white">
+              <span className="flex items-center gap-[4px] rounded-[4px] bg-primary/10 px-[8px] py-[3px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-primary">
                 <PushPin size={12} weight="fill" /> Solução do tópico
               </span>
             )}
             {comment.validated && (
-              <span className="flex items-center gap-[4px] rounded-[4px] bg-auvp-yellow px-[8px] py-[3px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-auvp-chumbo">
+              <span className="flex items-center gap-[4px] rounded-[4px] bg-accent/10 px-[8px] py-[3px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-accent">
                 <SealCheck size={12} weight="fill" /> Resposta Validada
               </span>
             )}
@@ -60,15 +60,15 @@ function CommentNode({ comment, byParent, post, depth, onReply, onReport }) {
 
         <div className="flex flex-wrap items-center gap-[8px]">
           <Avatar user={author} size={28} />
-          <Link to={`/perfil/${author.id}`} className="font-roboto text-[13px] font-medium text-auvp-chumbo hover:underline">
+          <Link to={`/perfil/${author.id}`} className="font-roboto text-[13px] font-medium text-foreground hover:underline">
             {author.nickname}
           </Link>
           <RoleLabel user={author} />
           <TurmaTag turma={author.turma} />
-          <span className="font-roboto text-[12px] text-auvp-gray-mid">· {timeAgo(comment.createdAt)}</span>
+          <span className="font-roboto text-[12px] text-muted-foreground">· {timeAgo(comment.createdAt)}</span>
         </div>
 
-        <p className="mt-[10px] font-roboto text-[15px] leading-[1.6] text-auvp-chumbo">{comment.body}</p>
+        <p className="mt-[10px] font-roboto text-[15px] leading-[1.6] text-foreground">{comment.body}</p>
 
         <div className="mt-[10px] flex flex-wrap items-center gap-[10px]">
           <VoteControl
@@ -79,7 +79,7 @@ function CommentNode({ comment, byParent, post, depth, onReply, onReport }) {
           />
           <button
             onClick={() => onReply(comment)}
-            className="flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-auvp-gray-mid transition-all duration-240 hover:text-auvp-green"
+            className="flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-primary"
           >
             <ArrowBendUpLeft size={14} weight="bold" /> Responder
           </button>
@@ -87,7 +87,7 @@ function CommentNode({ comment, byParent, post, depth, onReply, onReport }) {
             <button
               onClick={() => markSolution(post.id, comment.id)}
               className={`flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] transition-all duration-240 ${
-                isSolution ? 'text-auvp-green' : 'text-auvp-gray-mid hover:text-auvp-green'
+                isSolution ? 'text-primary' : 'text-muted-foreground hover:text-primary'
               }`}
             >
               <CheckCircle size={14} weight={isSolution ? 'fill' : 'bold'} /> {isSolution ? 'Solução marcada' : 'Marcar solução'}
@@ -96,7 +96,7 @@ function CommentNode({ comment, byParent, post, depth, onReply, onReport }) {
           {currentUser.role === 'conselheiro' || currentUser.role === 'moderador' ? (
             <button
               onClick={() => validateAnswer(comment.id)}
-              className="flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-auvp-gray-mid transition-all duration-240 hover:text-auvp-green"
+              className="flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-accent"
             >
               <SealCheck size={14} weight="bold" /> Validar
             </button>
@@ -104,7 +104,7 @@ function CommentNode({ comment, byParent, post, depth, onReply, onReport }) {
           <button
             onClick={() => onReport({ targetType: 'comment', targetId: comment.id, targetAuthorId: comment.authorId, excerpt: comment.body.slice(0, 120) })}
             aria-label="Denunciar comentário"
-            className="ml-auto flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-auvp-gray-mid transition-all duration-240 hover:text-[#B42318]"
+            className="ml-auto flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-destructive"
           >
             <Flag size={14} weight="bold" /> Denunciar
           </button>
@@ -160,7 +160,7 @@ export default function PostDetailPage() {
 
   return (
     <div className="flex flex-col gap-[15px]">
-      <Link to="/" className="flex w-fit items-center gap-[6px] font-sora text-[12px] font-bold uppercase tracking-[0.05em] text-auvp-green hover:underline">
+      <Link to="/" className="flex w-fit items-center gap-[6px] font-sora text-[12px] font-bold uppercase tracking-[0.05em] text-primary hover:underline">
         <ArrowLeft size={14} weight="bold" /> Voltar ao Hub
       </Link>
 
@@ -170,19 +170,19 @@ export default function PostDetailPage() {
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-[8px]">
               <Avatar user={author} size={34} />
-              <Link to={`/perfil/${author.id}`} className="font-roboto text-[14px] font-medium text-auvp-chumbo hover:underline">
+              <Link to={`/perfil/${author.id}`} className="font-roboto text-[14px] font-medium text-foreground hover:underline">
                 {author.nickname}
               </Link>
               <RoleLabel user={author} />
               <TurmaTag turma={author.turma} />
-              <span className="font-roboto text-[13px] text-auvp-gray-mid">· {timeAgo(post.createdAt)}</span>
+              <span className="font-roboto text-[13px] text-muted-foreground">· {timeAgo(post.createdAt)}</span>
             </div>
 
             <div className="mt-[15px] flex flex-wrap items-center gap-[8px]">
               <FlairBadge flair={post.flair} />
             </div>
-            <h1 className="mt-[8px] font-anek text-[26px] md:text-[34px] font-semibold leading-[1.15] text-auvp-green">{post.title}</h1>
-            <p className="mt-[15px] font-roboto text-[17px] leading-[1.6] text-auvp-chumbo">{post.body}</p>
+            <h1 className="mt-[8px] font-anek text-[26px] md:text-[34px] font-semibold leading-[1.15] text-foreground">{post.title}</h1>
+            <p className="mt-[15px] font-roboto text-[17px] leading-[1.6] text-foreground">{post.body}</p>
 
             <div className="mt-[15px] flex flex-wrap gap-[8px]">
               {post.tags.map((t) => (
@@ -192,9 +192,9 @@ export default function PostDetailPage() {
 
             {/* Aviso de pergunta respondida + ir para solução */}
             {post.solutionCommentId && (
-              <div className="mt-[20px] flex flex-wrap items-center gap-[15px] rounded-[12px] bg-auvp-gray p-[15px]">
-                <span className="flex items-center gap-[8px] font-roboto text-[15px] font-medium text-auvp-green">
-                  <CheckCircle size={20} weight="fill" /> Esta pergunta já foi respondida
+              <div className="mt-[20px] flex flex-wrap items-center gap-[15px] rounded-[12px] bg-muted p-[15px]">
+                <span className="flex items-center gap-[8px] font-roboto text-[15px] font-medium text-foreground">
+                  <CheckCircle size={20} weight="fill" className="text-primary" /> Esta pergunta já foi respondida
                 </span>
                 <Button size="xs" variant="outline" onClick={goToSolution}>
                   Ir para solução
@@ -204,11 +204,11 @@ export default function PostDetailPage() {
 
             {/* Sugestão automática de aula da Escola AUVP */}
             {post.suggestedLesson && (
-              <div className="mt-[15px] flex flex-wrap items-center gap-[10px] rounded-[12px] border border-auvp-green/20 bg-white p-[15px]">
-                <GraduationCap size={22} weight="bold" className="text-auvp-green" />
+              <div className="mt-[15px] flex flex-wrap items-center gap-[10px] rounded-[12px] border border-primary/20 bg-card p-[15px]">
+                <GraduationCap size={22} weight="bold" className="text-primary" />
                 <div className="min-w-0 flex-1">
-                  <p className="font-sora text-[10px] font-bold uppercase tracking-[0.15em] text-auvp-green">Sugestão de aula · Escola AUVP</p>
-                  <p className="font-roboto text-[14px] text-auvp-chumbo">
+                  <p className="font-sora text-[10px] font-bold uppercase tracking-[0.15em] text-primary">Sugestão de aula · Escola AUVP</p>
+                  <p className="font-roboto text-[14px] text-foreground">
                     {post.suggestedLesson.module} — {post.suggestedLesson.lesson}
                   </p>
                 </div>
@@ -221,7 +221,7 @@ export default function PostDetailPage() {
             <div className="mt-[15px] flex justify-end">
               <button
                 onClick={() => setReportTarget({ targetType: 'post', targetId: post.id, targetAuthorId: post.authorId, excerpt: post.title })}
-                className="flex items-center gap-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-auvp-gray-mid transition-all duration-240 hover:text-[#B42318]"
+                className="flex items-center gap-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-destructive"
               >
                 <Flag size={14} weight="bold" /> Denunciar publicação
               </button>
@@ -234,11 +234,11 @@ export default function PostDetailPage() {
       <Card className="!p-[20px]">
         <form onSubmit={submitComment}>
           {replyTo && (
-            <div className="mb-[10px] flex items-center justify-between rounded-[5px] bg-auvp-gray px-[12px] py-[8px]">
-              <p className="font-roboto text-[13px] text-auvp-gray-mid">
-                Respondendo a <strong className="text-auvp-chumbo">{users[replyTo.authorId].nickname}</strong>: “{replyTo.body.slice(0, 60)}…”
+            <div className="mb-[10px] flex items-center justify-between rounded-[5px] bg-muted px-[12px] py-[8px]">
+              <p className="font-roboto text-[13px] text-muted-foreground">
+                Respondendo a <strong className="text-foreground">{users[replyTo.authorId].nickname}</strong>: “{replyTo.body.slice(0, 60)}…”
               </p>
-              <button type="button" onClick={() => setReplyTo(null)} className="font-sora text-[11px] font-bold uppercase text-auvp-green">
+              <button type="button" onClick={() => setReplyTo(null)} className="font-sora text-[11px] font-bold uppercase text-primary">
                 Cancelar
               </button>
             </div>
@@ -249,7 +249,7 @@ export default function PostDetailPage() {
             placeholder={replyTo ? 'Escreva sua resposta…' : 'Contribua com o tópico…'}
             rows={3}
             aria-label="Escrever comentário"
-            className="w-full resize-y rounded-[5px] border border-black/15 p-[15px] font-roboto text-[15px] outline-none transition-all duration-240 focus:border-auvp-green"
+            className="w-full resize-y rounded-[5px] border border-border bg-background p-[15px] font-roboto text-[15px] text-foreground outline-none transition-all duration-240 focus:border-primary"
           />
           <div className="mt-[10px] flex justify-end">
             <Button size="sm" type="submit" disabled={!commentText.trim()}>
@@ -261,8 +261,8 @@ export default function PostDetailPage() {
 
       {/* Árvore de comentários */}
       <section aria-label="Comentários">
-        <h2 className="mb-[15px] font-anek text-[22px] font-semibold text-auvp-green">
-          Comentários <span className="font-roboto text-[14px] font-normal text-auvp-gray-mid">({postComments.length})</span>
+        <h2 className="mb-[15px] font-anek text-[22px] font-semibold text-foreground">
+          Comentários <span className="font-roboto text-[14px] font-normal text-muted-foreground">({postComments.length})</span>
         </h2>
         <div className="flex flex-col gap-[10px]">
           {(byParent.root || []).map((c) => (
@@ -274,14 +274,14 @@ export default function PostDetailPage() {
 
       {/* Modal de denúncia */}
       <Modal open={!!reportTarget} onClose={() => setReportTarget(null)} title="Denunciar conteúdo">
-        <p className="font-roboto text-[15px] text-auvp-gray-mid">
+        <p className="font-roboto text-[15px] text-muted-foreground">
           Sua identidade fica protegida por anonimato público — apenas a moderação poderá vê-la.
         </p>
         <div className="mt-[15px] flex flex-col gap-[8px]">
           {REPORT_REASONS.map((r) => (
-            <label key={r} className={`flex cursor-pointer items-center gap-[10px] rounded-[5px] border p-[12px] transition-all duration-240 ${reportReason === r ? 'border-auvp-green bg-auvp-gray' : 'border-black/10'}`}>
-              <input type="radio" name="report-reason" checked={reportReason === r} onChange={() => setReportReason(r)} className="accent-[#023619]" />
-              <span className="font-roboto text-[15px]">{r}</span>
+            <label key={r} className={`flex cursor-pointer items-center gap-[10px] rounded-[5px] border p-[12px] transition-all duration-240 ${reportReason === r ? 'border-primary bg-muted' : 'border-border'}`}>
+              <input type="radio" name="report-reason" checked={reportReason === r} onChange={() => setReportReason(r)} className="accent-primary" />
+              <span className="font-roboto text-[15px] text-foreground">{r}</span>
             </label>
           ))}
         </div>

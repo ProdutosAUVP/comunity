@@ -10,23 +10,25 @@ const NAV = [
   { to: '/moderacao/auditoria', label: 'M-05 · Auditoria', icon: ClockCounterClockwise },
 ]
 
-// Dashboard do moderador: dark mode nativo obrigatório em 100% das telas.
+// Dashboard do moderador: dark mode nativo obrigatório em 100% das telas,
+// independente da preferência de tema do aluno. Verde (accent) reservado
+// para o único acento pontual: a aba ativa.
 export default function ModLayout() {
   return (
-    <div className="dark min-h-screen bg-black">
-      <header className="border-b border-white/10 bg-auvp-green-dark">
+    <div className="dark min-h-screen bg-background text-foreground">
+      <header className="border-b border-border bg-background">
         <div className="mx-auto flex h-[64px] max-w-[1200px] items-center gap-[15px] px-6">
           <Link
             to="/"
-            className="flex items-center gap-[6px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-auvp-gray transition-all duration-240 hover:text-white"
+            className="flex items-center gap-[6px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-foreground"
           >
             <ArrowLeft size={15} weight="bold" /> Comunidade
           </Link>
           <div className="ml-auto flex items-center gap-[10px]">
-            <span className="font-anek text-[18px] font-semibold text-white">
-              Moderação <span className="text-auvp-yellow">AUVP</span>
+            <span className="font-anek text-[18px] font-semibold text-foreground">
+              Moderação <span className="text-accent">AUVP</span>
             </span>
-            <span className="rounded-[4px] bg-auvp-yellow px-[8px] py-[2px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-auvp-chumbo">
+            <span className="rounded-[4px] bg-accent/10 px-[8px] py-[2px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-accent">
               Moderador oficial
             </span>
           </div>
@@ -34,7 +36,7 @@ export default function ModLayout() {
       </header>
 
       {/* Navegação em abas — mobile-first com adaptação desktop */}
-      <nav className="sticky top-0 z-30 border-b border-white/10 bg-black" aria-label="Telas administrativas">
+      <nav className="sticky top-0 z-30 border-b border-border bg-background" aria-label="Telas administrativas">
         <div className="mx-auto max-w-[1200px] overflow-x-auto scrollbar-thin px-6">
           <div className="flex min-w-max">
             {NAV.map(({ to, label, icon: Icon, end }) => (
@@ -44,7 +46,7 @@ export default function ModLayout() {
                 end={end}
                 className={({ isActive }) =>
                   `flex items-center gap-[8px] border-b-2 px-[15px] py-[14px] font-sora text-[12px] font-bold uppercase tracking-[0.05em] transition-all duration-240 ${
-                    isActive ? 'border-auvp-yellow text-auvp-yellow' : 'border-transparent text-auvp-gray hover:text-white'
+                    isActive ? 'border-accent text-accent' : 'border-transparent text-muted-foreground hover:text-foreground'
                   }`
                 }
               >
@@ -56,7 +58,7 @@ export default function ModLayout() {
         </div>
       </nav>
 
-      <main className="mx-auto max-w-[1200px] px-6 py-[30px] text-auvp-gray">
+      <main className="mx-auto max-w-[1200px] px-6 py-[30px] text-foreground">
         <Outlet />
       </main>
       <ToastStack />

@@ -13,7 +13,7 @@ const STATUS_TABS = [
 
 const SANCTIONS = ['Sem sanção adicional', 'Advertência Formal', 'Mute de 24 horas', 'Mute de 48 horas', 'Mute de 7 dias', 'Banimento Permanente da Comunidade']
 
-// Realça termos sensíveis em amarelo dentro do recorte do texto
+// Realça termos sensíveis dentro do recorte do texto
 function Excerpt({ text, terms }) {
   if (!terms?.length) return <>“{text}”</>
   const pattern = new RegExp(`(${terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi')
@@ -23,7 +23,7 @@ function Excerpt({ text, terms }) {
       “
       {parts.map((part, i) =>
         terms.some((t) => t.toLowerCase() === part.toLowerCase()) ? (
-          <mark key={i} className="rounded-[2px] bg-auvp-yellow px-[3px] text-auvp-chumbo">
+          <mark key={i} className="rounded-[2px] bg-destructive/20 px-[3px] text-foreground">
             {part}
           </mark>
         ) : (
@@ -52,11 +52,11 @@ export default function ModReports() {
   return (
     <div className="flex flex-col gap-[20px]">
       <div>
-        <Eyebrow dark>Tela M-02</Eyebrow>
-        <h1 className="mt-[4px] font-anek text-[30px] md:text-[41px] font-semibold leading-[1.15] text-white">
+        <Eyebrow>Tela M-02</Eyebrow>
+        <h1 className="mt-[4px] font-anek text-[30px] md:text-[41px] font-semibold leading-[1.15] text-foreground">
           Fila de Denúncias
         </h1>
-        <p className="mt-[8px] font-roboto text-[15px] text-auvp-gray-mid">
+        <p className="mt-[8px] font-roboto text-[15px] text-muted-foreground">
           Triagem rápida otimizada para alto volume. A identificação do denunciante é protegida por anonimato público e
           visível apenas aqui.
         </p>
@@ -65,7 +65,6 @@ export default function ModReports() {
       <div className="flex flex-wrap items-center gap-[15px]">
         <div className="overflow-x-auto scrollbar-thin">
           <Segmented
-            dark
             options={STATUS_TABS.map((t) => ({ ...t, count: counts[t.value] }))}
             value={tab}
             onChange={(v) => {
@@ -76,20 +75,20 @@ export default function ModReports() {
         </div>
         {/* Ações em massa — interface desktop */}
         {tab === 'pendente' && selected.length > 0 && (
-          <Button size="xs" variant="outline-dark" onClick={() => { bulkArchiveReports(selected); setSelected([]) }}>
+          <Button size="xs" variant="outline" onClick={() => { bulkArchiveReports(selected); setSelected([]) }}>
             Arquivar em massa ({selected.length})
           </Button>
         )}
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState dark title="Fila limpa" subtitle="Nenhuma denúncia neste estado." />
+        <EmptyState title="Fila limpa" subtitle="Nenhuma denúncia neste estado." />
       ) : (
         <div className="flex flex-col gap-[15px]">
           {filtered.map((r) => {
             const overdue = r.status === 'pendente' && Date.now() - new Date(r.createdAt).getTime() > 4 * 3600e3
             return (
-              <div key={r.id} className="rounded-[12px] border border-white/10 bg-auvp-chumbo p-[20px]">
+              <div key={r.id} className="rounded-[12px] border border-border bg-card p-[20px]">
                 <div className="flex flex-wrap items-center gap-[10px]">
                   {tab === 'pendente' && (
                     <input
@@ -97,57 +96,57 @@ export default function ModReports() {
                       checked={selected.includes(r.id)}
                       onChange={() => toggleSelect(r.id)}
                       aria-label={`Selecionar denúncia ${r.id}`}
-                      className="h-[16px] w-[16px] accent-[#EFBE4F]"
+                      className="h-[16px] w-[16px] accent-accent"
                     />
                   )}
-                  <span className="rounded-[4px] bg-[#B42318] px-[8px] py-[2px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-white">
+                  <span className="rounded-[4px] bg-destructive px-[8px] py-[2px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-destructive-foreground">
                     {r.reason}
                   </span>
-                  <span className="font-roboto text-[13px] text-auvp-gray-mid">
-                    {r.targetType === 'post' ? 'Publicação' : 'Comentário'} de <strong className="text-auvp-gray">{users[r.targetAuthorId]?.nickname}</strong>
+                  <span className="font-roboto text-[13px] text-muted-foreground">
+                    {r.targetType === 'post' ? 'Publicação' : 'Comentário'} de <strong className="text-foreground">{users[r.targetAuthorId]?.nickname}</strong>
                   </span>
                   {overdue && (
-                    <span className="flex items-center gap-[4px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-[#E5484D]">
+                    <span className="flex items-center gap-[4px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-destructive">
                       <WarningOctagon size={13} weight="fill" /> SLA estourado (+4h)
                     </span>
                   )}
-                  <span className="ml-auto font-roboto text-[12px] text-auvp-gray-mid">{timeAgo(r.createdAt)}</span>
+                  <span className="ml-auto font-roboto text-[12px] text-muted-foreground">{timeAgo(r.createdAt)}</span>
                 </div>
 
-                <p className="mt-[15px] rounded-[8px] bg-black p-[15px] font-roboto text-[15px] leading-[1.6] text-auvp-gray">
+                <p className="mt-[15px] rounded-[8px] bg-background p-[15px] font-roboto text-[15px] leading-[1.6] text-foreground">
                   <Excerpt text={r.excerpt} terms={r.sensitiveTerms} />
                 </p>
 
-                <div className="mt-[10px] flex flex-wrap items-center gap-[10px] font-roboto text-[12px] text-auvp-gray-mid">
+                <div className="mt-[10px] flex flex-wrap items-center gap-[10px] font-roboto text-[12px] text-muted-foreground">
                   <span>
-                    Denunciante (visível só para moderação): <strong className="text-auvp-gray">{users[r.reporterId]?.nickname}</strong>
+                    Denunciante (visível só para moderação): <strong className="text-foreground">{users[r.reporterId]?.nickname}</strong>
                   </span>
                   <button
                     onClick={() => setContextReport(r)}
-                    className="flex items-center gap-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-auvp-yellow hover:underline"
+                    className="flex items-center gap-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-accent hover:underline"
                   >
                     <ArrowSquareOut size={13} weight="bold" /> Ver contexto original
                   </button>
                 </div>
 
                 {r.resolution && (
-                  <p className="mt-[10px] font-roboto text-[13px] text-auvp-gray-mid">
-                    Resolução: <strong className="text-auvp-gray">{r.resolution}</strong>
+                  <p className="mt-[10px] font-roboto text-[13px] text-muted-foreground">
+                    Resolução: <strong className="text-foreground">{r.resolution}</strong>
                   </p>
                 )}
 
                 {(r.status === 'pendente' || r.status === 'analise') && (
-                  <div className="mt-[15px] flex flex-wrap gap-[10px] border-t border-white/10 pt-[15px]">
-                    <Button size="xs" variant="outline-dark" onClick={() => resolveReport(r.id, 'manter')}>
+                  <div className="mt-[15px] flex flex-wrap gap-[10px] border-t border-border pt-[15px]">
+                    <Button size="xs" variant="outline" onClick={() => resolveReport(r.id, 'manter')}>
                       Manter Conteúdo
                     </Button>
-                    <Button size="xs" variant="yellow" onClick={() => resolveReport(r.id, 'ocultar')}>
+                    <Button size="xs" variant="accent" onClick={() => resolveReport(r.id, 'ocultar')}>
                       Ocultar Temporariamente
                     </Button>
                     <Button size="xs" variant="danger" onClick={() => { setRemoveReport(r); setSanction(SANCTIONS[0]) }}>
                       Remover Permanentemente
                     </Button>
-                    <Button size="xs" variant="ghost-dark" onClick={() => resolveReport(r.id, 'escalar')}>
+                    <Button size="xs" variant="ghost" onClick={() => resolveReport(r.id, 'escalar')}>
                       Escalar para Admin
                     </Button>
                   </div>
@@ -158,24 +157,24 @@ export default function ModReports() {
         </div>
       )}
 
-      <p className="font-roboto text-[13px] text-auvp-gray-mid">
+      <p className="font-roboto text-[13px] text-muted-foreground">
         No mobile, gestos de deslizar aplicam "Manter" (direita) ou "Ocultar" (esquerda). Conteúdos removidos recebem a flag
-        <code className="mx-[4px] rounded-[4px] bg-auvp-chumbo px-[6px] py-[1px] text-auvp-yellow">status: deleted_by_moderator</code>
+        <code className="mx-[4px] rounded-[4px] bg-muted px-[6px] py-[1px] text-accent">status: deleted_by_moderator</code>
         (soft delete) e permanecem legíveis no Log de Auditoria, em conformidade com o Marco Civil da Internet.
       </p>
 
       {/* Modal "Ver contexto original" */}
-      <Modal open={!!contextReport} onClose={() => setContextReport(null)} title="Contexto original" dark wide>
+      <Modal open={!!contextReport} onClose={() => setContextReport(null)} title="Contexto original" wide>
         {contextReport && (
           <div className="flex flex-col gap-[15px]">
-            <p className="font-roboto text-[14px] text-auvp-gray-mid">
+            <p className="font-roboto text-[14px] text-muted-foreground">
               {contextReport.targetType === 'post' ? 'Publicação' : 'Comentário'} · autor:{' '}
-              <strong className="text-auvp-gray">{users[contextReport.targetAuthorId]?.nickname}</strong> · {timeAgo(contextReport.createdAt)}
+              <strong className="text-foreground">{users[contextReport.targetAuthorId]?.nickname}</strong> · {timeAgo(contextReport.createdAt)}
             </p>
-            <div className="rounded-[12px] bg-black p-[20px] font-roboto text-[16px] leading-[1.6] text-auvp-gray">
+            <div className="rounded-[12px] bg-background p-[20px] font-roboto text-[16px] leading-[1.6] text-foreground">
               <Excerpt text={contextReport.excerpt} terms={contextReport.sensitiveTerms} />
             </div>
-            <p className="font-roboto text-[13px] text-auvp-gray-mid">
+            <p className="font-roboto text-[13px] text-muted-foreground">
               Prontuário do autor: {users[contextReport.targetAuthorId]?.infractions} infração(ões) acumulada(s).
             </p>
           </div>
@@ -183,11 +182,11 @@ export default function ModReports() {
       </Modal>
 
       {/* Pop-up de confirmação de sanção ao remover */}
-      <Modal open={!!removeReport} onClose={() => setRemoveReport(null)} title="Remover permanentemente" dark>
+      <Modal open={!!removeReport} onClose={() => setRemoveReport(null)} title="Remover permanentemente">
         {removeReport && (
           <>
-            <p className="font-roboto text-[15px] text-auvp-gray-mid">
-              O conteúdo será excluído do fórum e o autor <strong className="text-auvp-gray">{users[removeReport.targetAuthorId]?.nickname}</strong>{' '}
+            <p className="font-roboto text-[15px] text-muted-foreground">
+              O conteúdo será excluído do fórum e o autor <strong className="text-foreground">{users[removeReport.targetAuthorId]?.nickname}</strong>{' '}
               será avisado com justificativa parametrizada. Selecione a sanção adicional:
             </p>
             <div className="mt-[15px] flex flex-col gap-[8px]">
@@ -195,16 +194,16 @@ export default function ModReports() {
                 <label
                   key={s}
                   className={`flex cursor-pointer items-center gap-[10px] rounded-[5px] border p-[12px] transition-all duration-240 ${
-                    sanction === s ? 'border-auvp-yellow bg-black' : 'border-white/10'
+                    sanction === s ? 'border-accent bg-background' : 'border-border'
                   }`}
                 >
-                  <input type="radio" name="sanction" checked={sanction === s} onChange={() => setSanction(s)} className="accent-[#EFBE4F]" />
-                  <span className="font-roboto text-[14px] text-auvp-gray">{s}</span>
+                  <input type="radio" name="sanction" checked={sanction === s} onChange={() => setSanction(s)} className="accent-accent" />
+                  <span className="font-roboto text-[14px] text-foreground">{s}</span>
                 </label>
               ))}
             </div>
             <div className="mt-[20px] flex justify-end gap-[15px]">
-              <Button size="sm" variant="ghost-dark" onClick={() => setRemoveReport(null)}>
+              <Button size="sm" variant="ghost" onClick={() => setRemoveReport(null)}>
                 Cancelar
               </Button>
               <Button

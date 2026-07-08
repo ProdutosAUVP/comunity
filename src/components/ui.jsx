@@ -1,7 +1,17 @@
 import { useEffect } from 'react'
 import { SealCheck, ShieldStar, X } from '@phosphor-icons/react'
-import { FLAIRS } from '../data/mock'
 import { useApp } from '../context/AppContext'
+
+// Mapeamento de flair -> token semântico (usado só como pequeno indicador
+// de cor; o corpo do badge permanece neutro — cor de forma pontual).
+export const FLAIR_TOKENS = {
+  Dúvida: 'info',
+  Case: 'primary',
+  Meme: 'neutral',
+  Live: 'destructive',
+  Aula: 'success',
+  Conquista: 'warning',
+}
 
 // ── Botões do Design System (radius 5px, Sora 700 uppercase) ───────────────
 export function Button({ variant = 'primary', size = 'md', className = '', children, ...props }) {
@@ -13,14 +23,14 @@ export function Button({ variant = 'primary', size = 'md', className = '', child
     xs: 'text-[11px] py-[7px] px-[15px]',
   }
   const variants = {
-    primary: 'bg-auvp-green text-white border-auvp-green hover:bg-transparent hover:text-auvp-green',
-    outline: 'bg-transparent text-auvp-green border-auvp-green hover:bg-auvp-green hover:text-white',
-    'outline-dark': 'bg-transparent text-white border-white hover:bg-white hover:text-auvp-green',
-    yellow: 'bg-auvp-yellow text-auvp-chumbo border-auvp-yellow hover:bg-transparent hover:text-auvp-yellow',
-    ghost: 'bg-transparent text-auvp-green border-transparent hover:border-auvp-green',
-    'ghost-dark': 'bg-transparent text-auvp-gray border-transparent hover:border-white hover:text-white',
-    danger: 'bg-[#B42318] text-white border-[#B42318] hover:bg-transparent hover:text-[#B42318]',
-    'danger-outline': 'bg-transparent text-[#B42318] border-[#B42318] hover:bg-[#B42318] hover:text-white',
+    primary: 'bg-primary text-primary-foreground border-primary hover:bg-transparent hover:text-primary',
+    outline: 'bg-transparent text-foreground border-border hover:border-primary hover:text-primary',
+    secondary:
+      'bg-secondary text-secondary-foreground border-secondary hover:bg-transparent hover:text-secondary dark:bg-transparent dark:text-foreground dark:border-foreground dark:hover:bg-foreground dark:hover:text-background',
+    ghost: 'bg-transparent text-muted-foreground border-transparent hover:text-foreground hover:border-border',
+    danger: 'bg-destructive text-destructive-foreground border-destructive hover:bg-transparent hover:text-destructive',
+    'danger-outline': 'bg-transparent text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground',
+    accent: 'bg-accent text-accent-foreground border-accent hover:bg-transparent hover:text-accent',
   }
   return (
     <button className={`${base} ${sizes[size]} ${variants[variant]} ${className}`} {...props}>
@@ -30,12 +40,12 @@ export function Button({ variant = 'primary', size = 'md', className = '', child
 }
 
 // ── Card padrão (radius 12px) ──────────────────────────────────────────────
-export function Card({ className = '', hover = false, dark = false, children, ...props }) {
+export function Card({ className = '', hover = false, children, ...props }) {
   return (
     <div
-      className={`rounded-[12px] p-[20px] md:p-[30px] ${
-        dark ? 'bg-auvp-chumbo' : 'bg-white border border-black/[0.06]'
-      } ${hover ? 'transition-all duration-240 hover:shadow-auvp-card hover:-translate-y-[2px]' : ''} ${className}`}
+      className={`rounded-[12px] border border-border bg-card text-card-foreground p-[20px] md:p-[30px] ${
+        hover ? 'transition-all duration-240 hover:shadow-auvp-card hover:-translate-y-[2px]' : ''
+      } ${className}`}
       {...props}
     >
       {children}
@@ -43,39 +53,43 @@ export function Card({ className = '', hover = false, dark = false, children, ..
   )
 }
 
-export function Eyebrow({ children, dark = false, className = '' }) {
+export function Eyebrow({ children, className = '' }) {
   return (
-    <span
-      className={`font-sora text-[12px] font-bold uppercase tracking-[0.15em] ${dark ? 'text-auvp-yellow' : 'text-auvp-green'} ${className}`}
-    >
+    <span className={`font-sora text-[12px] font-bold uppercase tracking-[0.15em] text-primary ${className}`}>
       {children}
     </span>
   )
 }
 
-// ── Flair de post (marcador visual institucional) ──────────────────────────
+// ── Flair de post: badge neutro + pequeno indicador de cor pontual ─────────
 export function FlairBadge({ flair, className = '' }) {
-  const style = FLAIRS[flair] || FLAIRS['Dúvida']
+  const token = FLAIR_TOKENS[flair] || 'primary'
+  const dotCls =
+    token === 'neutral'
+      ? 'bg-muted-foreground'
+      : token === 'destructive'
+        ? 'bg-destructive'
+        : token === 'success'
+          ? 'bg-success'
+          : token === 'warning'
+            ? 'bg-warning'
+            : token === 'info'
+              ? 'bg-info'
+              : 'bg-primary'
   return (
     <span
-      className={`inline-flex items-center rounded-[4px] px-[10px] py-[3px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] ${className}`}
-      style={{
-        backgroundColor: style.bg,
-        color: style.text,
-        border: style.border ? '1px solid rgba(0,0,0,0.15)' : '1px solid transparent',
-      }}
+      className={`inline-flex items-center gap-[6px] rounded-[4px] border border-border bg-muted px-[10px] py-[3px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-foreground ${className}`}
     >
+      <span className={`h-[6px] w-[6px] rounded-full ${dotCls}`} aria-hidden />
       {flair}
     </span>
   )
 }
 
-export function TagPill({ tag, active = false, onClick, dark = false }) {
+export function TagPill({ tag, active = false, onClick }) {
   const cls = active
-    ? 'bg-auvp-green text-white border-auvp-green'
-    : dark
-      ? 'bg-transparent text-auvp-gray border-white/30 hover:border-white'
-      : 'bg-white text-auvp-gray-mid border-black/10 hover:border-auvp-green hover:text-auvp-green'
+    ? 'bg-primary text-primary-foreground border-primary'
+    : 'bg-transparent text-muted-foreground border-border hover:border-primary hover:text-primary'
   return (
     <button
       type="button"
@@ -88,13 +102,9 @@ export function TagPill({ tag, active = false, onClick, dark = false }) {
   )
 }
 
-export function TurmaTag({ turma, dark = false }) {
+export function TurmaTag({ turma }) {
   return (
-    <span
-      className={`inline-flex items-center rounded-[4px] px-[8px] py-[2px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] ${
-        dark ? 'bg-auvp-yellow text-auvp-chumbo' : 'bg-auvp-green text-white'
-      }`}
-    >
+    <span className="inline-flex items-center rounded-[4px] border border-border bg-muted px-[8px] py-[2px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-muted-foreground">
       {turma}
     </span>
   )
@@ -104,17 +114,13 @@ export function TurmaTag({ turma, dark = false }) {
 export function Avatar({ user, size = 44, showRole = true }) {
   const isCounselor = user.role === 'conselheiro'
   const isMod = user.role === 'moderador' || user.role === 'oficial'
-  const ring = isCounselor
-    ? 'ring-2 ring-auvp-yellow ring-offset-2'
-    : isMod
-      ? 'ring-2 ring-auvp-green ring-offset-2'
-      : ''
+  const ring = isCounselor ? 'ring-2 ring-accent ring-offset-2 ring-offset-background' : isMod ? 'ring-2 ring-foreground/30 ring-offset-2 ring-offset-background' : ''
   const fontSize = Math.max(11, Math.round(size * 0.34))
   return (
     <span className="relative inline-flex shrink-0">
       <span
-        className={`inline-flex items-center justify-center rounded-full font-anek font-semibold text-white ${ring}`}
-        style={{ width: size, height: size, backgroundColor: isMod ? '#011F0E' : '#023619', fontSize }}
+        className={`inline-flex items-center justify-center rounded-full bg-muted font-anek font-semibold text-foreground ${ring}`}
+        style={{ width: size, height: size, fontSize }}
         aria-label={`Avatar de ${user.nickname}`}
       >
         {user.initials}
@@ -123,8 +129,7 @@ export function Avatar({ user, size = 44, showRole = true }) {
         <SealCheck
           size={Math.max(14, size * 0.4)}
           weight="fill"
-          color="#EFBE4F"
-          className="absolute -bottom-1 -right-1 bg-white rounded-full"
+          className="absolute -bottom-1 -right-1 rounded-full bg-background text-accent"
           aria-label="Conselheiro AUVP"
         />
       )}
@@ -132,8 +137,7 @@ export function Avatar({ user, size = 44, showRole = true }) {
         <ShieldStar
           size={Math.max(14, size * 0.4)}
           weight="fill"
-          color="#023619"
-          className="absolute -bottom-1 -right-1 bg-white rounded-full"
+          className="absolute -bottom-1 -right-1 rounded-full bg-background text-foreground"
           aria-label="Moderação oficial"
         />
       )}
@@ -141,22 +145,22 @@ export function Avatar({ user, size = 44, showRole = true }) {
   )
 }
 
-export function RoleLabel({ user, dark = false }) {
+export function RoleLabel({ user }) {
   if (user.role === 'conselheiro')
     return (
-      <span className={`font-sora text-[10px] font-bold uppercase tracking-[0.05em] rounded-[4px] px-[6px] py-[1px] ${dark ? 'bg-auvp-yellow text-auvp-chumbo' : 'bg-auvp-yellow text-auvp-chumbo'}`}>
+      <span className="font-sora text-[10px] font-bold uppercase tracking-[0.05em] rounded-[4px] px-[6px] py-[1px] bg-accent/10 text-accent">
         Conselheiro{user.specialty ? ` · ${user.specialty}` : ''}
       </span>
     )
   if (user.role === 'moderador')
     return (
-      <span className="font-sora text-[10px] font-bold uppercase tracking-[0.05em] rounded-[4px] px-[6px] py-[1px] bg-auvp-green text-white">
+      <span className="font-sora text-[10px] font-bold uppercase tracking-[0.05em] rounded-[4px] px-[6px] py-[1px] bg-primary/10 text-primary">
         Moderação
       </span>
     )
   if (user.role === 'oficial')
     return (
-      <span className="font-sora text-[10px] font-bold uppercase tracking-[0.05em] rounded-[4px] px-[6px] py-[1px] bg-auvp-green text-white">
+      <span className="font-sora text-[10px] font-bold uppercase tracking-[0.05em] rounded-[4px] px-[6px] py-[1px] bg-primary/10 text-primary">
         Oficial
       </span>
     )
@@ -164,12 +168,9 @@ export function RoleLabel({ user, dark = false }) {
 }
 
 // ── Segmented control (alternador de feeds) ────────────────────────────────
-export function Segmented({ options, value, onChange, dark = false }) {
+export function Segmented({ options, value, onChange }) {
   return (
-    <div
-      role="tablist"
-      className={`inline-flex rounded-[5px] border overflow-hidden ${dark ? 'border-white/20 bg-auvp-chumbo' : 'border-black/10 bg-white'}`}
-    >
+    <div role="tablist" className="inline-flex rounded-[5px] border border-border bg-muted/50 overflow-hidden">
       {options.map((opt) => {
         const active = opt.value === value
         return (
@@ -179,11 +180,7 @@ export function Segmented({ options, value, onChange, dark = false }) {
             aria-selected={active}
             onClick={() => onChange(opt.value)}
             className={`px-[15px] py-[10px] font-sora text-[12px] font-bold uppercase tracking-[0.05em] transition-all duration-240 ${
-              active
-                ? 'bg-auvp-green text-white'
-                : dark
-                  ? 'text-auvp-gray hover:text-white'
-                  : 'text-auvp-gray-mid hover:text-auvp-green'
+              active ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             {opt.label}
@@ -196,7 +193,7 @@ export function Segmented({ options, value, onChange, dark = false }) {
 }
 
 // ── Modal ──────────────────────────────────────────────────────────────────
-export function Modal({ open, onClose, title, children, dark = false, wide = false }) {
+export function Modal({ open, onClose, title, children, wide = false }) {
   useEffect(() => {
     if (!open) return
     const onKey = (e) => e.key === 'Escape' && onClose()
@@ -208,18 +205,14 @@ export function Modal({ open, onClose, title, children, dark = false, wide = fal
     <div className="fixed inset-0 z-50 flex items-center justify-center p-[15px]" role="dialog" aria-modal="true" aria-label={title}>
       <div className="absolute inset-0 bg-black/70" onClick={onClose} />
       <div
-        className={`relative w-full ${wide ? 'max-w-[760px]' : 'max-w-[520px]'} max-h-[88vh] overflow-y-auto scrollbar-thin rounded-[12px] p-[20px] md:p-[30px] ${
-          dark ? 'bg-auvp-chumbo text-auvp-gray' : 'bg-white'
-        }`}
+        className={`relative w-full ${wide ? 'max-w-[760px]' : 'max-w-[520px]'} max-h-[88vh] overflow-y-auto scrollbar-thin rounded-[12px] border border-border bg-card text-card-foreground p-[20px] md:p-[30px]`}
       >
         <div className="flex items-start justify-between gap-[15px] mb-[15px]">
-          <h3 className={`font-anek text-[22px] md:text-[28px] font-semibold leading-tight ${dark ? 'text-white' : 'text-auvp-green'}`}>
-            {title}
-          </h3>
+          <h3 className="font-anek text-[22px] md:text-[28px] font-semibold leading-tight text-foreground">{title}</h3>
           <button
             onClick={onClose}
             aria-label="Fechar"
-            className={`rounded-[5px] p-[6px] transition-all duration-240 ${dark ? 'text-auvp-gray hover:bg-white/10' : 'text-auvp-gray-mid hover:bg-auvp-gray'}`}
+            className="rounded-[5px] p-[6px] text-muted-foreground transition-all duration-240 hover:bg-muted hover:text-foreground"
           >
             <X size={20} weight="bold" />
           </button>
@@ -235,16 +228,16 @@ export function ToastStack() {
   const { toasts } = useApp()
   if (!toasts.length) return null
   return (
-    <div className="fixed bottom-[15px] left-1/2 -translate-x-1/2 z-[60] flex flex-col gap-[8px] w-[calc(100%-30px)] max-w-[440px]" aria-live="polite">
+    <div className="fixed bottom-[65px] left-1/2 -translate-x-1/2 z-[60] flex flex-col gap-[8px] w-[calc(100%-30px)] max-w-[440px]" aria-live="polite">
       {toasts.map((t) => (
         <div
           key={t.id}
           className={`animate-toast-in rounded-[5px] px-[15px] py-[12px] font-roboto text-[14px] shadow-auvp-card border ${
             t.kind === 'error'
-              ? 'bg-[#B42318] text-white border-[#B42318]'
+              ? 'bg-destructive text-destructive-foreground border-destructive'
               : t.kind === 'info'
-                ? 'bg-auvp-chumbo text-auvp-gray border-auvp-chumbo'
-                : 'bg-auvp-green text-white border-auvp-green'
+                ? 'bg-foreground text-background border-foreground'
+                : 'bg-primary text-primary-foreground border-primary'
           }`}
         >
           {t.message}
@@ -254,42 +247,34 @@ export function ToastStack() {
   )
 }
 
-export function EmptyState({ title, subtitle, dark = false }) {
+export function EmptyState({ title, subtitle }) {
   return (
-    <div className={`rounded-[12px] border border-dashed px-[20px] py-[45px] text-center ${dark ? 'border-white/20' : 'border-black/15'}`}>
-      <p className={`font-anek text-[22px] font-semibold ${dark ? 'text-white' : 'text-auvp-green'}`}>{title}</p>
-      {subtitle && <p className={`mt-[8px] font-roboto text-[15px] ${dark ? 'text-auvp-gray' : 'text-auvp-gray-mid'}`}>{subtitle}</p>}
+    <div className="rounded-[12px] border border-dashed border-border px-[20px] py-[45px] text-center">
+      <p className="font-anek text-[22px] font-semibold text-foreground">{title}</p>
+      {subtitle && <p className="mt-[8px] font-roboto text-[15px] text-muted-foreground">{subtitle}</p>}
     </div>
   )
 }
 
-export function ProgressBar({ value, dark = false }) {
+export function ProgressBar({ value }) {
   return (
-    <div
-      className={`h-[8px] w-full rounded-[4px] overflow-hidden ${dark ? 'bg-white/15' : 'bg-black/10'}`}
-      role="progressbar"
-      aria-valuenow={value}
-      aria-valuemin={0}
-      aria-valuemax={100}
-    >
-      <div className={`h-full ${dark ? 'bg-auvp-yellow' : 'bg-auvp-green'}`} style={{ width: `${Math.min(100, value)}%` }} />
+    <div className="h-[8px] w-full rounded-[4px] overflow-hidden bg-muted" role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={100}>
+      <div className="h-full bg-primary" style={{ width: `${Math.min(100, value)}%` }} />
     </div>
   )
 }
 
-export function Stat({ label, value, urgent = false, dark = false, onClick }) {
+export function Stat({ label, value, urgent = false, onClick }) {
   const Comp = onClick ? 'button' : 'div'
   return (
     <Comp
       onClick={onClick}
-      className={`rounded-[12px] p-[20px] text-left w-full transition-all duration-240 ${
-        dark ? 'bg-auvp-chumbo border border-white/10' : 'bg-white border border-black/[0.06]'
-      } ${onClick ? 'hover:shadow-auvp-card hover:-translate-y-[2px] cursor-pointer' : ''}`}
+      className={`rounded-[12px] border border-border bg-card p-[20px] text-left w-full transition-all duration-240 ${
+        onClick ? 'hover:shadow-auvp-card hover:-translate-y-[2px] cursor-pointer' : ''
+      }`}
     >
-      <p className={`font-anek text-[34px] font-semibold leading-none ${urgent ? 'text-[#E5484D]' : dark ? 'text-white' : 'text-auvp-green'}`}>
-        {value}
-      </p>
-      <p className={`mt-[8px] font-roboto text-[13px] ${dark ? 'text-auvp-gray' : 'text-auvp-gray-mid'}`}>{label}</p>
+      <p className={`font-anek text-[34px] font-semibold leading-none ${urgent ? 'text-destructive' : 'text-foreground'}`}>{value}</p>
+      <p className="mt-[8px] font-roboto text-[13px] text-muted-foreground">{label}</p>
     </Comp>
   )
 }

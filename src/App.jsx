@@ -1,7 +1,9 @@
 import { HashRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
 import { AppProvider } from './context/AppContext'
+import { ThemeProvider } from './context/ThemeContext'
 import Layout from './components/Layout'
+import SuperAppShell from './components/SuperAppShell'
 import HubPage from './pages/HubPage'
 import SearchPage from './pages/SearchPage'
 import PostDetailPage from './pages/PostDetailPage'
@@ -29,6 +31,7 @@ function ScrollToTop() {
 
 export default function App() {
   return (
+    <ThemeProvider>
     <AppProvider>
       {/* HashRouter: navegação compatível com GitHub Pages (sem 404 em refresh) */}
       <HashRouter>
@@ -50,23 +53,26 @@ export default function App() {
           <Route
             path="*"
             element={
-              <Layout>
-                <Routes>
-                  <Route path="/" element={<HubPage />} />
-                  <Route path="/busca" element={<SearchPage />} />
-                  <Route path="/post/:postId" element={<PostDetailPage />} />
-                  <Route path="/novo-post" element={<CreatePostPage />} />
-                  <Route path="/perfil/:userId" element={<ProfilePage />} />
-                  <Route path="/conexoes" element={<ConnectionsPage />} />
-                  <Route path="/mensagens" element={<InboxPage />} />
-                  <Route path="/notificacoes" element={<NotificationsPage />} />
-                  <Route path="/configuracoes" element={<SettingsPage />} />
-                </Routes>
-              </Layout>
+              <SuperAppShell>
+                <Layout>
+                  <Routes>
+                    <Route path="/" element={<HubPage />} />
+                    <Route path="/busca" element={<SearchPage />} />
+                    <Route path="/post/:postId" element={<PostDetailPage />} />
+                    <Route path="/novo-post" element={<CreatePostPage />} />
+                    <Route path="/perfil/:userId" element={<ProfilePage />} />
+                    <Route path="/conexoes" element={<ConnectionsPage />} />
+                    <Route path="/mensagens" element={<InboxPage />} />
+                    <Route path="/notificacoes" element={<NotificationsPage />} />
+                    <Route path="/configuracoes" element={<SettingsPage />} />
+                  </Routes>
+                </Layout>
+              </SuperAppShell>
             }
           />
         </Routes>
       </HashRouter>
     </AppProvider>
+    </ThemeProvider>
   )
 }
