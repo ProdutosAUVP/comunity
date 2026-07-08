@@ -145,20 +145,24 @@ export default function ConselheirosPage() {
                   const advisor = users[b.conselheiroId]
                   return (
                     <Card key={b.id} className="!p-[15px]">
-                      <div className="flex flex-wrap items-center gap-[15px]">
-                        <Avatar user={advisor} size={44} />
-                        <div className="min-w-0 flex-1">
-                          <p className="font-roboto text-[15px] font-medium text-foreground">{advisor.nickname}</p>
-                          <p className="font-roboto text-[13px] text-muted-foreground">{formatDateTime(b.at)}</p>
+                      <div className="flex flex-col gap-[15px] sm:flex-row sm:items-center">
+                        <div className="flex items-center gap-[15px]">
+                          <Avatar user={advisor} size={44} />
+                          <div className="min-w-0">
+                            <p className="font-roboto text-[15px] font-medium text-foreground">{advisor.nickname}</p>
+                            <p className="font-roboto text-[13px] text-muted-foreground">{formatDateTime(b.at)}</p>
+                          </div>
                         </div>
-                        <a href={b.meetLink} target="_blank" rel="noreferrer">
-                          <Button size="xs" variant="primary">
-                            <VideoCamera size={14} weight="bold" /> Entrar na reunião
+                        <div className="flex flex-wrap items-center gap-[10px] sm:ml-auto sm:shrink-0">
+                          <a href={b.meetLink} target="_blank" rel="noreferrer">
+                            <Button size="xs" variant="primary">
+                              <VideoCamera size={14} weight="bold" /> Entrar na reunião
+                            </Button>
+                          </a>
+                          <Button size="xs" variant="ghost" onClick={() => cancelBooking(b.id)}>
+                            <X size={14} weight="bold" /> Cancelar
                           </Button>
-                        </a>
-                        <Button size="xs" variant="ghost" onClick={() => cancelBooking(b.id)}>
-                          <X size={14} weight="bold" /> Cancelar
-                        </Button>
+                        </div>
                       </div>
                     </Card>
                   )
