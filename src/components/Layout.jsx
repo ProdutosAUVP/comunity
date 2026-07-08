@@ -9,6 +9,7 @@ import {
   MagnifyingGlass,
   Moon,
   Plus,
+  ShieldCheck,
   ShieldStar,
   Sparkle,
   Sun,
@@ -18,6 +19,7 @@ import {
 import { useApp } from '../context/AppContext'
 import { useTheme } from '../context/ThemeContext'
 import { Avatar, ToastStack } from './ui'
+import AuvpLogo from './AuvpLogo'
 
 const NAV = [
   { to: '/', label: 'Hub da Comunidade', icon: House, end: true },
@@ -43,7 +45,7 @@ function ThemeToggle() {
 }
 
 export default function Layout({ children }) {
-  const { currentUser, notifications, conversations } = useApp()
+  const { currentUser, notifications, conversations, moderationMode, toggleModerationMode } = useApp()
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const unread = notifications.filter((n) => !n.read).length
@@ -56,8 +58,8 @@ export default function Layout({ children }) {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Barra superior — cromada neutra; verde reservado à marca (logo) e a estados ativos */}
-      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-saturate-150">
+      {/* Barra superior — efeito glass sutil (fundo translúcido + blur) */}
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/70 backdrop-blur-md">
         <div className="mx-auto flex h-[64px] max-w-[1200px] items-center gap-[15px] px-6">
           {/* Menu hamburguer (mobile) — a navegação inferior não é usada aqui
               porque a Comunidade roda embutida no SuperApp, que já tem sua
@@ -71,8 +73,8 @@ export default function Layout({ children }) {
           </button>
 
           <Link to="/" className="flex items-center gap-[8px]" aria-label="Comunidade AUVP — início">
-            <span className="flex h-[32px] w-[32px] items-center justify-center rounded-[5px] bg-primary font-anek text-[18px] font-bold text-primary-foreground">
-              A
+            <span className="flex h-[32px] w-[32px] items-center justify-center rounded-[5px] bg-primary p-[6px] text-primary-foreground">
+              <AuvpLogo className="h-full w-full" />
             </span>
             <span className="hidden sm:block font-anek text-[20px] font-semibold text-foreground leading-none">
               Comunidade AUVP
@@ -133,14 +135,34 @@ export default function Layout({ children }) {
               </NavLink>
             ))}
             <div className="mt-[15px] border-t border-border pt-[15px]">
-              <NavLink to="/moderacao" className="flex items-center gap-[10px] rounded-[5px] px-[15px] py-[11px] font-roboto text-[15px] text-muted-foreground transition-all duration-240 hover:bg-muted hover:text-foreground">
-                <ShieldStar size={18} weight="bold" /> Dashboard Moderação
-              </NavLink>
+              <button
+                onClick={toggleModerationMode}
+                aria-pressed={moderationMode}
+                className={`flex w-full items-center gap-[10px] rounded-[5px] px-[15px] py-[11px] font-roboto text-[15px] transition-all duration-240 ${
+                  moderationMode ? 'bg-accent/10 text-accent' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`}
+              >
+                <ShieldCheck size={18} weight={moderationMode ? 'fill' : 'bold'} />
+                {moderationMode ? 'Moderando comunidade' : 'Moderar comunidade'}
+              </button>
             </div>
           </div>
         </nav>
 
-        <main className="min-w-0 flex-1">{children}</main>
+        <main className="min-w-0 flex-1">
+          {moderationMode && (
+            <div className="mb-[15px] flex flex-wrap items-center gap-[10px] rounded-[8px] border border-accent/30 bg-accent/5 px-[15px] py-[10px]">
+              <ShieldCheck size={16} weight="fill" className="text-accent" />
+              <p className="font-roboto text-[13px] text-foreground">
+                Modo de moderação ativo — tópicos ganham controles de editar, ocultar, mover e excluir.
+              </p>
+              <button onClick={toggleModerationMode} className="ml-auto font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-accent hover:underline">
+                Sair do modo
+              </button>
+            </div>
+          )}
+          {children}
+        </main>
       </div>
 
       {/* Botão flutuante de nova postagem */}
@@ -156,7 +178,7 @@ export default function Layout({ children }) {
       {drawerOpen && (
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu de navegação">
           <div className="absolute inset-0 bg-black/60" onClick={() => setDrawerOpen(false)} />
-          <div className="animate-drawer-in absolute left-0 top-0 h-full w-[280px] max-w-[80vw] overflow-y-auto scrollbar-thin bg-background p-[20px]">
+          <div className="animate-drawer-in absolute left-0 top-0 h-full w-[280px] max-w-[80vw] overflow-y-auto scrollbar-thin border-r border-border/60 bg-background/80 backdrop-blur-md p-[20px]">
             <div className="mb-[20px] flex items-center justify-between">
               <span className="font-anek text-[18px] font-semibold text-foreground">Comunidade AUVP</span>
               <button onClick={() => setDrawerOpen(false)} aria-label="Fechar menu" className="rounded-[5px] p-[6px] text-muted-foreground hover:bg-muted">
@@ -170,10 +192,17 @@ export default function Layout({ children }) {
                   {label}
                 </NavLink>
               ))}
-              <div className="mt-[15px] border-t border-border pt-[15px]">
-                <NavLink to="/moderacao" className="flex items-center gap-[10px] rounded-[5px] px-[15px] py-[11px] font-roboto text-[15px] text-muted-foreground transition-all duration-240 hover:bg-muted hover:text-foreground">
-                  <ShieldStar size={18} weight="bold" /> Dashboard Moderação
-                </NavLink>
+              <div className="mt-[15px] border-t border-border pt-[15px]" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={toggleModerationMode}
+                  aria-pressed={moderationMode}
+                  className={`flex w-full items-center gap-[10px] rounded-[5px] px-[15px] py-[11px] font-roboto text-[15px] transition-all duration-240 ${
+                    moderationMode ? 'bg-accent/10 text-accent' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  }`}
+                >
+                  <ShieldCheck size={18} weight={moderationMode ? 'fill' : 'bold'} />
+                  {moderationMode ? 'Moderando comunidade' : 'Moderar comunidade'}
+                </button>
               </div>
             </div>
           </div>

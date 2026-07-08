@@ -16,9 +16,9 @@ export default function SuperAppShell({ children }) {
     <div className="mx-auto flex min-h-screen max-w-[1440px] flex-col bg-muted/40">
       <div className="flex-1">{children}</div>
 
-      {/* Navegação inferior global do SuperApp (mockada, não navegável) */}
+      {/* Navegação inferior global do SuperApp (mockada, não navegável) — glass sutil */}
       <nav
-        className="sticky bottom-0 z-[70] flex items-center justify-around border-t border-border bg-background py-[6px]"
+        className="sticky bottom-0 z-[70] flex items-center justify-around border-t border-border/60 bg-background/70 backdrop-blur-md py-[6px]"
         aria-label="Navegação do SuperApp AUVP (mockada)"
       >
         {TABS.map((tab) => {

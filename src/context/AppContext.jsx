@@ -40,7 +40,7 @@ export function AppProvider({ children }) {
     dnd: false,
     notifPrefs: {
       respostas: true,
-      curtidas: true,
+      votos: true,
       seguidores: true,
       lives: true,
       moderacao: true,
@@ -49,6 +49,9 @@ export function AppProvider({ children }) {
     notifFrequency: 'imediata', // imediata | resumo-diario | resumo-semanal
   })
   const [liveDismissed, setLiveDismissed] = useState(false)
+  // Modo de moderação inline: visualiza a comunidade normalmente, mas com
+  // controles de moderação (editar/ocultar/mover/excluir) nos tópicos.
+  const [moderationMode, setModerationMode] = useState(false)
 
   const currentUser = users[CURRENT_USER_ID]
 
@@ -394,6 +397,56 @@ export function AppProvider({ children }) {
     [logAction, toast],
   )
 
+  const toggleModerationMode = useCallback(() => {
+    setModerationMode((m) => !m)
+  }, [])
+
+  // ── Moderação inline de tópicos (visão da própria comunidade) ─────────
+  const editPost = useCallback(
+    (postId, patch) => {
+      setPosts((ps) => ps.map((p) => (p.id === postId ? { ...p, ...patch } : p)))
+      logAction('Editar Tópico', '-', `Post ${postId}`, 'Edição direta pela moderação', false)
+      toast('Tópico editado pela moderação.')
+    },
+    [logAction, toast],
+  )
+
+  const togglePostHidden = useCallback(
+    (postId) => {
+      let nowHidden = false
+      setPosts((ps) =>
+        ps.map((p) => {
+          if (p.id !== postId) return p
+          nowHidden = !p.hidden
+          return { ...p, hidden: nowHidden }
+        }),
+      )
+      logAction(nowHidden ? 'Ocultar Tópico' : 'Reexibir Tópico', '-', `Post ${postId}`, 'Ação direta na visão da comunidade')
+      toast(nowHidden ? 'Tópico ocultado da comunidade.' : 'Tópico reexibido na comunidade.')
+    },
+    [logAction, toast],
+  )
+
+  const movePost = useCallback(
+    (postId, newFlair) => {
+      setPosts((ps) => ps.map((p) => (p.id === postId ? { ...p, flair: newFlair } : p)))
+      logAction('Mover Tópico', '-', `Post ${postId} → ${newFlair}`, 'Recategorização pela moderação', false)
+      toast(`Tópico movido para a categoria "${newFlair}".`)
+    },
+    [logAction, toast],
+  )
+
+  const deletePost = useCallback(
+    (postId) => {
+      // Soft delete: nunca remove fisicamente o registro (flag status:
+      // deleted_by_moderator), mantendo o payload legível na Auditoria.
+      setPosts((ps) => ps.map((p) => (p.id === postId ? { ...p, hidden: true, deleted: true } : p)))
+      logAction('Remover Tópico', '-', `Post ${postId}`, 'Exclusão direta pela moderação (soft delete)', true)
+      toast('Tópico removido. Registro mantido no Log de Auditoria (soft delete).')
+    },
+    [logAction, toast],
+  )
+
   const value = useMemo(
     () => ({
       users,
@@ -415,6 +468,12 @@ export function AppProvider({ children }) {
       toasts,
       liveDismissed,
       setLiveDismissed,
+      moderationMode,
+      toggleModerationMode,
+      editPost,
+      togglePostHidden,
+      movePost,
+      deletePost,
       toast,
       votePost,
       voteComment,
@@ -443,7 +502,8 @@ export function AppProvider({ children }) {
     [
       users, currentUser, posts, comments, postVotes, commentVotes, notifications, conversations,
       friendRequests, blockedUsers, dmSentToday, reports, nicknameQueue, auditLog, sanctions,
-      settings, toasts, liveDismissed, toast, votePost, voteComment, createPost, addComment,
+      settings, toasts, liveDismissed, moderationMode, toggleModerationMode, editPost,
+      togglePostHidden, movePost, deletePost, toast, votePost, voteComment, createPost, addComment,
       markSolution, validateAnswer, reportContent, toggleFollow, acceptFriendRequest,
       declineFriendRequest, sendMessage, moveToPrincipal, blockUser, markNotificationsRead,
       markNotificationRead, updateSettings, requestNicknameChange, resolveReport,

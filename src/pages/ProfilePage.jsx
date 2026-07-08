@@ -16,8 +16,15 @@ import {
 } from '@phosphor-icons/react'
 import { useApp } from '../context/AppContext'
 import PostCard from '../components/PostCard'
+import CoverArt from '../components/CoverArt'
 import { Avatar, Button, Card, EmptyState, Eyebrow, ProgressBar, RoleLabel, Segmented, TurmaTag } from '../components/ui'
 import { BADGES, LORE_LEVELS, RECENT_VISITORS, SHOP_ITEMS, loreForXp, timeAgo } from '../data/mock'
+
+const BANNER_ARTS = ['chart', 'ocean', 'skyline', 'allocation']
+function bannerForUser(userId) {
+  const sum = [...userId].reduce((s, c) => s + c.charCodeAt(0), 0)
+  return BANNER_ARTS[sum % BANNER_ARTS.length]
+}
 
 // Paleta do gráfico PIAR: majoritariamente tons neutros + um único acento
 // (verde institucional) — visualização de dados, não decoração de UI.
@@ -144,9 +151,12 @@ export default function ProfilePage() {
   return (
     <div className="flex flex-col gap-[15px]">
       {/* Cabeçalho de identidade */}
-      <Card>
-        <div className="flex flex-wrap items-start gap-[20px]">
-          <Avatar user={user} size={80} />
+      <Card className="!p-0 overflow-hidden">
+        <CoverArt id={bannerForUser(user.id)} className="h-[90px] w-full" />
+        <div className="flex flex-wrap items-start gap-[20px] p-[20px] md:p-[30px] pt-0">
+          <div className="-mt-[40px] rounded-full ring-4 ring-card">
+            <Avatar user={user} size={80} />
+          </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-[10px]">
               <h1 className="font-anek text-[28px] md:text-[34px] font-semibold leading-tight text-foreground">{user.nickname}</h1>

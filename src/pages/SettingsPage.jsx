@@ -30,7 +30,7 @@ function Toggle({ checked, onChange, label, description }) {
 
 const NOTIF_CATEGORIES = [
   { key: 'respostas', label: 'Respostas e comentários', desc: 'Interações nos tópicos que você criou ou segue' },
-  { key: 'curtidas', label: 'Votos e curtidas', desc: 'Quando suas publicações recebem votos' },
+  { key: 'votos', label: 'Votos', desc: 'Quando suas publicações recebem votos' },
   { key: 'seguidores', label: 'Novos seguidores', desc: 'Quando alguém começa a te seguir' },
   { key: 'lives', label: 'Lives e eventos', desc: 'Avisos de lives elegíveis para a sua turma' },
   { key: 'moderacao', label: 'Moderação', desc: 'Avisos oficiais e resultados de solicitações' },

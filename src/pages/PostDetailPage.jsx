@@ -11,6 +11,7 @@ import {
 } from '@phosphor-icons/react'
 import { useApp } from '../context/AppContext'
 import { VoteControl } from '../components/PostCard'
+import CoverArt from '../components/CoverArt'
 import { Avatar, Button, Card, EmptyState, FlairBadge, Modal, RoleLabel, TagPill, TurmaTag } from '../components/ui'
 import { REPORT_REASONS, timeAgo } from '../data/mock'
 
@@ -165,6 +166,7 @@ export default function PostDetailPage() {
       </Link>
 
       <Card>
+        {post.cover && <CoverArt id={post.cover} className="-mx-[20px] -mt-[20px] md:-mx-[30px] md:-mt-[30px] mb-[20px] h-[180px] rounded-t-[12px]" />}
         <div className="flex gap-[15px]">
           <VoteControl score={post.upvotes} vote={postVotes[post.id] || 0} onVote={(dir) => votePost(post.id, dir)} />
           <div className="min-w-0 flex-1">

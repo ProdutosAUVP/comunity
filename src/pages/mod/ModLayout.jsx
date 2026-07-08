@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { ArrowLeft, ChartLine, ClockCounterClockwise, Flag, SealCheck, UsersThree } from '@phosphor-icons/react'
 import { ToastStack } from '../../components/ui'
+import AuvpLogo from '../../components/AuvpLogo'
 
 const NAV = [
   { to: '/moderacao', label: 'M-01 · Visão Geral', icon: ChartLine, end: true },
@@ -16,7 +17,7 @@ const NAV = [
 export default function ModLayout() {
   return (
     <div className="dark min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-background">
+      <header className="border-b border-border/60 bg-background/70 backdrop-blur-md">
         <div className="mx-auto flex h-[64px] max-w-[1200px] items-center gap-[15px] px-6">
           <Link
             to="/"
@@ -25,6 +26,9 @@ export default function ModLayout() {
             <ArrowLeft size={15} weight="bold" /> Comunidade
           </Link>
           <div className="ml-auto flex items-center gap-[10px]">
+            <span className="flex h-[26px] w-[26px] items-center justify-center rounded-[5px] bg-accent p-[5px] text-accent-foreground">
+              <AuvpLogo className="h-full w-full" />
+            </span>
             <span className="font-anek text-[18px] font-semibold text-foreground">
               Moderação <span className="text-accent">AUVP</span>
             </span>
@@ -35,8 +39,8 @@ export default function ModLayout() {
         </div>
       </header>
 
-      {/* Navegação em abas — mobile-first com adaptação desktop */}
-      <nav className="sticky top-0 z-30 border-b border-border bg-background" aria-label="Telas administrativas">
+      {/* Navegação em abas — mobile-first com adaptação desktop; glass sutil */}
+      <nav className="sticky top-0 z-30 border-b border-border/60 bg-background/70 backdrop-blur-md" aria-label="Telas administrativas">
         <div className="mx-auto max-w-[1200px] overflow-x-auto scrollbar-thin px-6">
           <div className="flex min-w-max">
             {NAV.map(({ to, label, icon: Icon, end }) => (
