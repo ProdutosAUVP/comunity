@@ -54,12 +54,23 @@ const ARTS = {
   ),
 }
 
+export const COVER_ART_IDS = Object.keys(ARTS)
+
 export default function CoverArt({ id, className = '' }) {
+  if (!id) return null
   const art = ARTS[id]
-  if (!art) return null
+  if (art) {
+    return (
+      <div className={`overflow-hidden ${className}`} role="img" aria-label="Ilustração de capa">
+        {art}
+      </div>
+    )
+  }
+  // Capa personalizada: qualquer valor que não seja um id conhecido é
+  // tratado como URL/data URL de uma imagem enviada pelo autor.
   return (
-    <div className={`overflow-hidden ${className}`} role="img" aria-label="Ilustração de capa">
-      {art}
+    <div className={`overflow-hidden ${className}`}>
+      <img src={id} alt="Capa da publicação" className="h-full w-full object-cover" />
     </div>
   )
 }

@@ -5,10 +5,15 @@ import {
   ArrowFatUp,
   ArrowLeft,
   CheckCircle,
+  Eye,
+  EyeSlash,
   Flag,
   GraduationCap,
+  PencilSimple,
   PushPin,
   SealCheck,
+  ShieldCheck,
+  Trash,
 } from '@phosphor-icons/react'
 import { useApp } from '../context/AppContext'
 import { VoteControl } from '../components/PostCard'
@@ -17,6 +22,85 @@ import RichComposer from '../components/RichComposer'
 import { RichText, stripMarkdown } from '../components/RichText'
 import { AreaPill, Avatar, Button, Card, EmptyState, FlairBadge, Modal, RoleLabel, TagPill, TurmaTag } from '../components/ui'
 import { AREAS, REACTIONS, REPORT_REASONS, timeAgo } from '../data/mock'
+
+// Barra de moderação inline do comentário — mesmo padrão do ModTools de
+// posts (PostCard.jsx), disponível em qualquer lugar do programa onde a
+// árvore de comentários apareça, sempre que "Moderar comunidade" está ativo.
+function CommentModTools({ comment }) {
+  const { editComment, toggleCommentHidden, deleteComment } = useApp()
+  const [editOpen, setEditOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [body, setBody] = useState(comment.body)
+
+  const stop = (e) => e.stopPropagation()
+
+  return (
+    <div onClick={stop} className="mb-[10px] flex flex-wrap items-center gap-[8px] rounded-[8px] border border-accent/30 bg-accent/5 px-[10px] py-[6px]">
+      <span className="flex items-center gap-[4px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-accent">
+        <ShieldCheck size={12} weight="bold" /> Moderação
+      </span>
+      <Button size="xs" variant="ghost" onClick={() => setEditOpen(true)}>
+        <PencilSimple size={12} weight="bold" /> Editar
+      </Button>
+      <Button size="xs" variant="ghost" onClick={() => toggleCommentHidden(comment.id)}>
+        {comment.hidden ? <Eye size={12} weight="bold" /> : <EyeSlash size={12} weight="bold" />}
+        {comment.hidden ? 'Reexibir' : 'Ocultar'}
+      </Button>
+      <Button size="xs" variant="danger-outline" onClick={() => setDeleteOpen(true)}>
+        <Trash size={12} weight="bold" /> Excluir
+      </Button>
+      {comment.hidden && (
+        <span className="ml-auto rounded-[4px] bg-muted px-[8px] py-[2px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-muted-foreground">
+          Oculto da comunidade
+        </span>
+      )}
+
+      <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Editar comentário">
+        <div onClick={stop} className="flex flex-col gap-[15px]">
+          <RichComposer value={body} onChange={setBody} rows={4} ariaLabel="Editar comentário" />
+          <div className="flex justify-end gap-[15px]">
+            <Button size="sm" variant="ghost" onClick={() => setEditOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                editComment(comment.id, { body: body.trim() || comment.body })
+                setEditOpen(false)
+              }}
+            >
+              Salvar edição
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} title="Excluir comentário">
+        <div onClick={stop}>
+          <p className="font-roboto text-[15px] text-muted-foreground">
+            O comentário será removido da comunidade. Conforme o Marco Civil da Internet, o registro não é apagado
+            fisicamente — fica marcado como excluído e permanece legível no Log de Auditoria (soft delete).
+          </p>
+          <div className="mt-[20px] flex justify-end gap-[15px]">
+            <Button size="sm" variant="ghost" onClick={() => setDeleteOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              size="sm"
+              variant="danger"
+              onClick={() => {
+                deleteComment(comment.id)
+                setDeleteOpen(false)
+              }}
+            >
+              Excluir comentário
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    </div>
+  )
+}
 
 // Upvote-only: comentários não têm downvote (evita brigada anônima), só um
 // toggle de apoio, exibido ao lado do comentário como nos posts.
@@ -83,22 +167,38 @@ function buildTree(comments) {
 }
 
 function CommentNode({ comment, byParent, post, depth, onReply, onReport }) {
-  const { users, commentVotes, voteComment, markSolution, validateAnswer, currentUser } = useApp()
+  const { users, commentVotes, voteComment, markSolution, validateAnswer, currentUser, moderationMode } = useApp()
   const author = users[comment.authorId]
   const children = byParent[comment.id] || []
   const isSolution = post.solutionCommentId === comment.id
   const canMarkSolution = post.authorId === currentUser.id
+
+  const hiddenPlaceholder = comment.hidden && !moderationMode
 
   return (
     <div
       id={`comment-${comment.id}`}
       className={depth > 0 ? 'ml-[15px] border-l-2 border-border pl-[15px] md:ml-[20px] md:pl-[20px]' : ''}
     >
+      {hiddenPlaceholder ? (
+        <div className="rounded-[12px] border border-border bg-card p-[15px] opacity-80">
+          <div className="flex items-center gap-[10px] text-muted-foreground">
+            <EyeSlash size={16} weight="bold" />
+            <p className="font-roboto text-[13px]">Comentário ocultado pela moderação.</p>
+          </div>
+        </div>
+      ) : (
       <div
-        className={`flex gap-[12px] rounded-[12px] p-[15px] bg-card border ${
+        className={`flex flex-col gap-0 rounded-[12px] bg-card border ${
           isSolution ? 'border-primary/40' : comment.validated ? 'border-accent/40' : 'border-border'
         }`}
       >
+        {moderationMode && (
+          <div className="px-[15px] pt-[15px]">
+            <CommentModTools comment={comment} />
+          </div>
+        )}
+        <div className={`flex gap-[12px] ${moderationMode ? 'px-[15px] pb-[15px]' : 'p-[15px]'}`}>
         <CommentUpvote
           score={comment.upvotes}
           active={(commentVotes[comment.id] || 0) === 1}
@@ -168,7 +268,9 @@ function CommentNode({ comment, byParent, post, depth, onReply, onReport }) {
           </button>
           </div>
         </div>
+        </div>
       </div>
+      )}
 
       {children.length > 0 && (
         <div className="mt-[10px] flex flex-col gap-[10px]">
