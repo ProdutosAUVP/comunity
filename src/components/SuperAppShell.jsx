@@ -47,20 +47,17 @@ export default function SuperAppShell({ children }) {
 
       <div className="flex-1">{children}</div>
 
-      {/* Navegação inferior do SuperApp (mobile) — ícones + texto, glass sutil */}
+      {/* Navegação inferior do SuperApp (mobile) — só ícones, glass sutil */}
       <nav
-        className="sticky bottom-0 z-[70] flex items-center justify-around border-t border-border/60 bg-background/70 backdrop-blur-md py-[6px] lg:hidden"
+        className="sticky bottom-0 z-[70] flex items-center justify-around border-t border-border/60 bg-background/70 backdrop-blur-md py-[10px] lg:hidden"
         aria-label="Navegação do SuperApp AUVP (mockada)"
       >
         {TABS.map((tab) => {
           const isActive = tab.key === 'comunidade'
           const Icon = tab.icon
           return (
-            <div key={tab.key} className="flex flex-1 flex-col items-center gap-[2px] py-[6px]" aria-current={isActive ? 'page' : undefined}>
-              <Icon size={22} weight={isActive ? 'fill' : 'bold'} className={isActive ? 'text-primary' : 'text-muted-foreground'} />
-              <span className={`font-sora text-[10px] font-bold uppercase tracking-[0.03em] ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
-                {tab.label}
-              </span>
+            <div key={tab.key} className="flex flex-1 items-center justify-center py-[4px]" aria-current={isActive ? 'page' : undefined} aria-label={tab.label} title={tab.label}>
+              <Icon size={24} weight={isActive ? 'fill' : 'bold'} className={isActive ? 'text-primary' : 'text-muted-foreground'} />
             </div>
           )
         })}

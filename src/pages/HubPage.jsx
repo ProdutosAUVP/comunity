@@ -16,30 +16,31 @@ const HUB_TABS = [
   { value: 'topicos', label: 'Tópicos' },
 ]
 
+// Cronológico por padrão — o aluno só vê outra ordem se escolher "Votos".
+const POST_SORTS = [
+  { value: 'date', label: 'Data', cmp: (a, b) => new Date(b.createdAt) - new Date(a.createdAt) },
+  { value: 'votes', label: 'Votos', cmp: (a, b) => b.upvotes - a.upvotes },
+]
+
 export default function HubPage() {
   const { posts, currentUser } = useApp()
   const [view, setView] = useState('feed')
   const [feed, setFeed] = useState('foryou')
+  const [postSort, setPostSort] = useState('date')
 
   const visiblePosts = useMemo(() => {
     // Excluídos (soft delete) nunca voltam a aparecer aqui — só são
     // recuperáveis via Log de Auditoria (M-05) no dashboard de moderação.
     const notDeleted = posts.filter((p) => !p.deleted)
+    const bySort = POST_SORTS.find((s) => s.value === postSort).cmp
     if (feed === 'updates') {
-      return notDeleted.filter((p) => p.feed === 'updates').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      return notDeleted.filter((p) => p.feed === 'updates').sort(bySort)
     }
     if (feed === 'following') {
-      return notDeleted
-        .filter((p) => currentUser.following.includes(p.authorId))
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      return notDeleted.filter((p) => currentUser.following.includes(p.authorId)).sort(bySort)
     }
-    // "Para Você": ordenação simples por afinidade (mesma turma pesa mais) + engajamento
-    return notDeleted
-      .filter((p) => p.feed === 'foryou')
-      .map((p) => ({ p, score: p.upvotes + (p.turma === currentUser.turma ? 40 : 0) }))
-      .sort((a, b) => b.score - a.score)
-      .map(({ p }) => p)
-  }, [feed, posts, currentUser])
+    return notDeleted.filter((p) => p.feed === 'foryou').sort(bySort)
+  }, [feed, postSort, posts, currentUser])
 
   return (
     <div className="flex flex-col gap-[15px]">
@@ -68,8 +69,11 @@ export default function HubPage() {
           <LiveNowBanner />
           <UpcomingLiveCard />
 
-          <div className="overflow-x-auto scrollbar-thin">
-            <Segmented options={FEEDS} value={feed} onChange={setFeed} />
+          <div className="flex flex-wrap items-center justify-between gap-[10px]">
+            <div className="overflow-x-auto scrollbar-thin">
+              <Segmented options={FEEDS} value={feed} onChange={setFeed} />
+            </div>
+            <Segmented options={POST_SORTS.map(({ value, label }) => ({ value, label }))} value={postSort} onChange={setPostSort} />
           </div>
 
           {visiblePosts.length === 0 ? (

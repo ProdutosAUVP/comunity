@@ -153,9 +153,8 @@ function ReactionBar({ commentId }) {
 }
 
 const COMMENT_SORTS = [
-  { value: 'votes', label: 'Mais votados', cmp: (a, b) => b.upvotes - a.upvotes },
-  { value: 'newest', label: 'Mais recentes', cmp: (a, b) => new Date(b.createdAt) - new Date(a.createdAt) },
-  { value: 'oldest', label: 'Mais antigos', cmp: (a, b) => new Date(a.createdAt) - new Date(b.createdAt) },
+  { value: 'date', label: 'Data', cmp: (a, b) => new Date(b.createdAt) - new Date(a.createdAt) },
+  { value: 'votes', label: 'Votos', cmp: (a, b) => b.upvotes - a.upvotes },
 ]
 
 // Só os comentários de nível raiz seguem o filtro escolhido — as respostas
@@ -438,7 +437,8 @@ export default function PostDetailPage() {
   // Só um comentário pode estar com a caixa de resposta aberta por vez —
   // ela aparece inline, logo abaixo do comentário respondido.
   const [replyingTo, setReplyingTo] = useState(null)
-  const [commentSort, setCommentSort] = useState('votes')
+  // Cronológico por padrão — só muda se o aluno escolher ordenar por votos.
+  const [commentSort, setCommentSort] = useState('date')
 
   const post = posts.find((p) => p.id === postId)
   const postComments = useMemo(() => comments.filter((c) => c.postId === postId), [comments, postId])

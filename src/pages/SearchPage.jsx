@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { MagnifyingGlass } from '@phosphor-icons/react'
 import { useApp } from '../context/AppContext'
@@ -33,16 +33,19 @@ export default function SearchPage() {
     const q = query.trim().toLowerCase()
     const maxAge = date === '24h' ? 86400e3 : date === '7d' ? 7 * 86400e3 : date === '30d' ? 30 * 86400e3 : Infinity
 
-    const postResults = posts.filter((p) => {
-      if (p.hidden) return false
-      if (q && !`${p.title} ${p.body} ${p.tags.join(' ')}`.toLowerCase().includes(q)) return false
-      if (area && p.area !== area) return false
-      if (tags.length && !tags.every((t) => p.tags.includes(t))) return false
-      if (turma && p.turma !== turma) return false
-      if (flair && p.flair !== flair) return false
-      if (Date.now() - new Date(p.createdAt).getTime() > maxAge) return false
-      return true
-    })
+    const postResults = posts
+      .filter((p) => {
+        if (p.hidden) return false
+        if (q && !`${p.title} ${p.body} ${p.tags.join(' ')}`.toLowerCase().includes(q)) return false
+        if (area && p.area !== area) return false
+        if (tags.length && !tags.every((t) => p.tags.includes(t))) return false
+        if (turma && p.turma !== turma) return false
+        if (flair && p.flair !== flair) return false
+        if (Date.now() - new Date(p.createdAt).getTime() > maxAge) return false
+        return true
+      })
+      // Cronológico por padrão — a busca não tem opção de reordenar por votos.
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
 
     const userResults = q
       ? Object.values(users).filter(
@@ -54,6 +57,18 @@ export default function SearchPage() {
   }, [query, area, tags, turma, flair, date, posts, users])
 
   const hasFilters = query || area || tags.length || turma || flair || date !== 'all'
+
+  // Ao chegar aqui já com um filtro escolhido em outro lugar (categoria,
+  // tag ou flair de um post), a intenção é ver os resultados — não mexer
+  // nos filtros de novo — então rola direto para a lista de posts.
+  const resultsRef = useRef(null)
+  useEffect(() => {
+    const hasIncomingFilter = location.state?.initialArea || location.state?.initialTag || location.state?.initialFlair
+    if (hasIncomingFilter) {
+      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="flex flex-col gap-[15px]">
@@ -179,7 +194,7 @@ export default function SearchPage() {
         </section>
       )}
 
-      <section aria-label="Tópicos encontrados">
+      <section ref={resultsRef} className="scroll-mt-[74px] lg:scroll-mt-[134px]" aria-label="Tópicos encontrados">
         <h2 className="mb-[10px] font-anek text-[22px] font-semibold text-foreground">
           Tópicos <span className="font-roboto text-[14px] font-normal text-muted-foreground">({postResults.length})</span>
         </h2>
