@@ -4,6 +4,7 @@ import { ArrowFatUp, CaretLeft, CaretRight, ChatCircle, X } from '@phosphor-icon
 import { useApp } from '../context/AppContext'
 import { timeAgo } from '../data/mock'
 import { Avatar, Button, FlairBadge, TurmaTag } from './ui'
+import { stripMarkdown } from './RichText'
 import gifChart from '../assets/bento/chart.gif'
 import gifCoin from '../assets/bento/coin.gif'
 import gifConfetti from '../assets/bento/confetti.gif'
@@ -187,7 +188,7 @@ export default function TopicStories() {
               <h2 className="mt-[15px] font-anek text-[28px] md:text-[41px] font-semibold leading-[1.15] text-foreground">
                 {active.title}
               </h2>
-              <p className="mt-[15px] font-roboto text-[16px] leading-[1.6] text-muted-foreground line-clamp-4">{active.body}</p>
+              <p className="mt-[15px] font-roboto text-[16px] leading-[1.6] text-muted-foreground line-clamp-4">{stripMarkdown(active.body)}</p>
               <div className="mt-[20px] flex items-center justify-center gap-[20px] font-roboto text-[14px] text-muted-foreground">
                 <span className="flex items-center gap-[6px]">
                   <ArrowFatUp size={16} weight="bold" className="text-accent" /> {active.upvotes} votos

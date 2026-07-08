@@ -22,6 +22,7 @@ import {
 import { useApp } from '../context/AppContext'
 import PostCard from '../components/PostCard'
 import CoverArt from '../components/CoverArt'
+import { stripMarkdown } from '../components/RichText'
 import { Avatar, Button, Card, EmptyState, Eyebrow, ProgressBar, RoleLabel, Segmented, TurmaTag } from '../components/ui'
 import { BADGES, LORE_LEVELS, RECENT_VISITORS, SHOP_ITEMS, loreForXp, timeAgo } from '../data/mock'
 
@@ -366,7 +367,7 @@ export default function ProfilePage() {
                 const post = posts.find((p) => p.id === c.postId)
                 return (
                   <Link key={c.id} to={`/post/${c.postId}`} className="rounded-[12px] bg-muted p-[15px] transition-all duration-240 hover:shadow-auvp-card">
-                    <p className="font-roboto text-[14px] text-foreground line-clamp-2">“{c.body}”</p>
+                    <p className="font-roboto text-[14px] text-foreground line-clamp-2">“{stripMarkdown(c.body)}”</p>
                     <p className="mt-[6px] font-roboto text-[12px] text-muted-foreground">
                       em <strong>{post?.title}</strong> · {timeAgo(c.createdAt)} · {c.upvotes} votos
                     </p>

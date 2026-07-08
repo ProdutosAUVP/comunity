@@ -15,6 +15,7 @@ import { useApp } from '../context/AppContext'
 import { AREAS, timeAgo } from '../data/mock'
 import { AreaPill, Avatar, Button, Card, FlairBadge, Modal, RoleLabel, TagPill, TurmaTag } from './ui'
 import CoverArt from './CoverArt'
+import { stripMarkdown } from './RichText'
 
 export function VoteControl({ score, vote, onVote, vertical = true }) {
   return (
@@ -220,7 +221,7 @@ export default function PostCard({ post, compact = false }) {
             </h3>
           </div>
 
-          {!compact && <p className="mt-[8px] font-roboto text-[15px] text-foreground/80 line-clamp-2">{post.body}</p>}
+          {!compact && <p className="mt-[8px] font-roboto text-[15px] text-foreground/80 line-clamp-2">{stripMarkdown(post.body)}</p>}
 
           <div className="mt-[15px] flex flex-wrap items-center gap-[8px]">
             {post.tags.map((t) => (

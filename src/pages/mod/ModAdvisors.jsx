@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Star } from '@phosphor-icons/react'
 import { useApp } from '../../context/AppContext'
 import { Avatar, Button, Eyebrow, Modal, TagPill } from '../../components/ui'
+import { stripMarkdown } from '../../components/RichText'
 import { COUNSELOR_PERFORMANCE, UNANSWERED_QUEUE } from '../../data/mock'
 
 export default function ModAdvisors() {
@@ -98,7 +99,7 @@ export default function ModAdvisors() {
           {candidates.map((c) => (
             <div key={c.id} className="flex flex-wrap items-center gap-[10px] rounded-[12px] border border-border bg-card p-[15px]">
               <Avatar user={users[c.authorId]} size={32} />
-              <p className="min-w-0 flex-1 font-roboto text-[14px] text-foreground line-clamp-2">“{c.body}”</p>
+              <p className="min-w-0 flex-1 font-roboto text-[14px] text-foreground line-clamp-2">“{stripMarkdown(c.body)}”</p>
               <span className="font-roboto text-[12px] text-muted-foreground">{c.upvotes} votos</span>
               <Button size="xs" variant={c.validated ? 'outline' : 'accent'} onClick={() => validateAnswer(c.id)}>
                 {c.validated ? 'Remover chancela' : 'Validar resposta'}
