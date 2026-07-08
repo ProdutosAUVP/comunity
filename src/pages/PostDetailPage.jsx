@@ -9,7 +9,9 @@ import {
   EyeSlash,
   Flag,
   GraduationCap,
+  Minus,
   PencilSimple,
+  Plus,
   PushPin,
   SealCheck,
   ShieldCheck,
@@ -20,7 +22,7 @@ import { VoteControl } from '../components/PostCard'
 import CoverArt from '../components/CoverArt'
 import RichComposer from '../components/RichComposer'
 import { RichText, stripMarkdown } from '../components/RichText'
-import { AreaPill, Avatar, Button, Card, EmptyState, FlairBadge, Modal, RoleLabel, TagPill, TurmaTag } from '../components/ui'
+import { AreaPill, Avatar, Button, Card, EmptyState, FlairBadge, Modal, RoleLabel, Segmented, TagPill, TurmaTag } from '../components/ui'
 import { AREAS, REACTIONS, REPORT_REASONS, timeAgo } from '../data/mock'
 
 // Barra de moderação inline do comentário — mesmo padrão do ModTools de
@@ -103,22 +105,18 @@ function CommentModTools({ comment }) {
 }
 
 // Upvote-only: comentários não têm downvote (evita brigada anônima), só um
-// toggle de apoio, exibido ao lado do comentário como nos posts.
+// toggle de apoio — inline na barra de ações, junto de Responder/Denunciar.
 function CommentUpvote({ score, active, onToggle }) {
   return (
-    <div className="flex flex-col items-center gap-[4px]">
-      <button
-        onClick={(e) => {
-          e.stopPropagation()
-          onToggle()
-        }}
-        aria-label="Apoiar comentário"
-        className={`rounded-[5px] p-[5px] transition-all duration-240 ${active ? 'text-primary bg-muted' : 'text-muted-foreground hover:text-primary'}`}
-      >
-        <ArrowFatUp size={16} weight={active ? 'fill' : 'bold'} />
-      </button>
-      <span className={`font-sora text-[13px] font-bold ${active ? 'text-primary' : 'text-foreground'}`}>{score}</span>
-    </div>
+    <button
+      onClick={() => onToggle()}
+      aria-label="Apoiar comentário"
+      className={`flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold transition-all duration-240 ${
+        active ? 'text-primary' : 'text-muted-foreground hover:text-primary'
+      }`}
+    >
+      <ArrowFatUp size={14} weight={active ? 'fill' : 'bold'} /> {score}
+    </button>
   )
 }
 
@@ -154,14 +152,22 @@ function ReactionBar({ commentId }) {
   )
 }
 
-function buildTree(comments) {
+const COMMENT_SORTS = [
+  { value: 'votes', label: 'Mais votados', cmp: (a, b) => b.upvotes - a.upvotes },
+  { value: 'newest', label: 'Mais recentes', cmp: (a, b) => new Date(b.createdAt) - new Date(a.createdAt) },
+  { value: 'oldest', label: 'Mais antigos', cmp: (a, b) => new Date(a.createdAt) - new Date(b.createdAt) },
+]
+
+// Só os comentários de nível raiz seguem o filtro escolhido — as respostas
+// dentro de uma mesma conversa continuam em ordem cronológica, como no Reddit.
+function buildTree(comments, rootCmp) {
   const byParent = {}
   for (const c of comments) {
     const key = c.parentId || 'root'
     ;(byParent[key] ||= []).push(c)
   }
   for (const key of Object.keys(byParent)) {
-    byParent[key].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+    byParent[key].sort(key === 'root' ? rootCmp : (a, b) => new Date(a.createdAt) - new Date(b.createdAt))
   }
   return byParent
 }
@@ -199,135 +205,186 @@ function InlineReplyBox({ authorName, onCancel, onSubmit }) {
   )
 }
 
+// Conta toda a descendência (respostas de respostas) de um comentário, para
+// o resumo exibido quando a thread está recolhida ("X respostas ocultas").
+function countDescendants(byParent, commentId) {
+  const kids = byParent[commentId] || []
+  return kids.reduce((total, k) => total + 1 + countDescendants(byParent, k.id), 0)
+}
+
+// Largura do "trilho" do avatar e distância até a coluna de conteúdo —
+// usadas também para calcular o conector curvo (ver comentário abaixo).
+const RAIL_WIDTH = 32
+const RAIL_GAP = 10
+const CURVE_OFFSET = RAIL_WIDTH / 2 + RAIL_GAP // até o centro do trilho do pai
+const CURVE_HEIGHT = RAIL_WIDTH / 2 // até a metade da altura do avatar
+
 function CommentNode({ comment, byParent, post, depth, replyingTo, onStartReply, onCancelReply, onSubmitReply, onReport }) {
   const { users, commentVotes, voteComment, markSolution, validateAnswer, currentUser, moderationMode } = useApp()
+  const [collapsed, setCollapsed] = useState(false)
   const author = users[comment.authorId]
   const children = byParent[comment.id] || []
+  const hasChildren = children.length > 0
   const isSolution = post.solutionCommentId === comment.id
   const canMarkSolution = post.authorId === currentUser.id
   const isReplying = replyingTo === comment.id
+  const descendantCount = hasChildren ? countDescendants(byParent, comment.id) : 0
 
   const hiddenPlaceholder = comment.hidden && !moderationMode
 
   return (
-    // Estilo Reddit: sem card/caixa por comentário — só um traço vertical +
-    // recuo por nível de profundidade, conectando resposta ao pai.
-    <div
-      id={`comment-${comment.id}`}
-      className={depth > 0 ? 'ml-[10px] border-l-2 border-border pl-[15px] md:ml-[14px]' : ''}
-    >
+    // Estilo Reddit: a linha sai do círculo do avatar, passa por um "nó"
+    // (o botão de recolher/expandir) e se curva para se ligar ao avatar da
+    // resposta abaixo — em vez de um traço reto genérico.
+    <div id={`comment-${comment.id}`} className="relative">
+      {depth > 0 && (
+        <span
+          className="pointer-events-none absolute left-0 top-0 rounded-bl-[10px] border-b-2 border-l-2 border-border"
+          style={{ left: `-${CURVE_OFFSET}px`, width: `${CURVE_OFFSET}px`, height: `${CURVE_HEIGHT}px` }}
+          aria-hidden
+        />
+      )}
+
       {hiddenPlaceholder ? (
         <div className="flex items-center gap-[8px] py-[10px] text-muted-foreground">
           <EyeSlash size={15} weight="bold" />
           <p className="font-roboto text-[13px]">Comentário ocultado pela moderação.</p>
         </div>
       ) : (
-        <div className="py-[10px]">
-          {moderationMode && (
-            <div className="mb-[10px]">
-              <CommentModTools comment={comment} />
-            </div>
-          )}
-          <div className="flex gap-[10px]">
-            <CommentUpvote
-              score={comment.upvotes}
-              active={(commentVotes[comment.id] || 0) === 1}
-              onToggle={() => voteComment(comment.id, 1)}
-            />
-            <div className="min-w-0 flex-1">
-              {(isSolution || comment.validated) && (
-                <div className="mb-[8px] flex flex-wrap gap-[8px]">
-                  {isSolution && (
-                    <span className="flex items-center gap-[4px] rounded-[4px] bg-primary/10 px-[8px] py-[3px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-primary">
-                      <PushPin size={12} weight="fill" /> Solução do tópico
-                    </span>
-                  )}
-                  {comment.validated && (
-                    <span className="flex items-center gap-[4px] rounded-[4px] bg-accent/10 px-[8px] py-[3px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-accent">
-                      <SealCheck size={12} weight="fill" /> Resposta Validada
-                    </span>
-                  )}
-                </div>
-              )}
+        <div className="flex gap-[10px] py-[10px]">
+          {/* Trilho: avatar no topo, nó de recolher/expandir logo abaixo, e
+              a linha que continua descendo até a última resposta aninhada. */}
+          <div className="flex shrink-0 flex-col items-center" style={{ width: RAIL_WIDTH }}>
+            <Avatar user={author} size={RAIL_WIDTH} showRole={false} />
+            {hasChildren && (
+              <button
+                onClick={() => setCollapsed((c) => !c)}
+                aria-label={collapsed ? 'Expandir respostas' : 'Recolher respostas'}
+                title={collapsed ? 'Expandir respostas' : 'Recolher respostas'}
+                className="my-[6px] flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-all duration-240 hover:border-primary hover:text-primary"
+              >
+                {collapsed ? <Plus size={10} weight="bold" /> : <Minus size={10} weight="bold" />}
+              </button>
+            )}
+            {!collapsed && hasChildren && <span className="w-[2px] flex-1 bg-border" aria-hidden />}
+          </div>
 
-              <div className="flex flex-wrap items-center gap-[8px]">
-                <Avatar user={author} size={26} />
+          <div className="min-w-0 flex-1 pb-[4px]">
+            {moderationMode && (
+              <div className="mb-[10px]">
+                <CommentModTools comment={comment} />
+              </div>
+            )}
+
+            {collapsed ? (
+              <button onClick={() => setCollapsed(false)} className="flex items-center gap-[6px] text-left">
                 <Link to={`/perfil/${author.id}`} className="font-roboto text-[13px] font-medium text-foreground hover:underline">
                   {author.nickname}
                 </Link>
-                <RoleLabel user={author} />
-                <TurmaTag turma={author.turma} />
-                <span className="font-roboto text-[12px] text-muted-foreground">· {timeAgo(comment.createdAt)}</span>
-              </div>
+                <span className="font-roboto text-[12px] text-muted-foreground">
+                  · {timeAgo(comment.createdAt)} · {descendantCount + 1} comentários ocultos
+                </span>
+              </button>
+            ) : (
+              <>
+                {(isSolution || comment.validated) && (
+                  <div className="mb-[8px] flex flex-wrap gap-[8px]">
+                    {isSolution && (
+                      <span className="flex items-center gap-[4px] rounded-[4px] bg-primary/10 px-[8px] py-[3px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-primary">
+                        <PushPin size={12} weight="fill" /> Solução do tópico
+                      </span>
+                    )}
+                    {comment.validated && (
+                      <span className="flex items-center gap-[4px] rounded-[4px] bg-accent/10 px-[8px] py-[3px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-accent">
+                        <SealCheck size={12} weight="fill" /> Resposta Validada
+                      </span>
+                    )}
+                  </div>
+                )}
 
-              <RichText text={comment.body} className="mt-[6px] font-roboto text-[15px] leading-[1.6] text-foreground" />
+                <div className="flex flex-wrap items-center gap-[8px]">
+                  <Link to={`/perfil/${author.id}`} className="font-roboto text-[13px] font-medium text-foreground hover:underline">
+                    {author.nickname}
+                  </Link>
+                  <RoleLabel user={author} />
+                  <TurmaTag turma={author.turma} />
+                  <span className="font-roboto text-[12px] text-muted-foreground">· {timeAgo(comment.createdAt)}</span>
+                </div>
 
-              <ReactionBar commentId={comment.id} />
+                <RichText text={comment.body} className="mt-[6px] font-roboto text-[15px] leading-[1.6] text-foreground" />
 
-              <div className="mt-[8px] flex flex-wrap items-center gap-[10px]">
-                <button
-                  onClick={() => onStartReply(comment.id)}
-                  className={`flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] transition-all duration-240 ${
-                    isReplying ? 'text-primary' : 'text-muted-foreground hover:text-primary'
-                  }`}
-                >
-                  <ArrowBendUpLeft size={14} weight="bold" /> Responder
-                </button>
-                {canMarkSolution && (
+                <ReactionBar commentId={comment.id} />
+
+                <div className="mt-[8px] flex flex-wrap items-center gap-[10px]">
+                  <CommentUpvote
+                    score={comment.upvotes}
+                    active={(commentVotes[comment.id] || 0) === 1}
+                    onToggle={() => voteComment(comment.id, 1)}
+                  />
                   <button
-                    onClick={() => markSolution(post.id, comment.id)}
+                    onClick={() => onStartReply(comment.id)}
                     className={`flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] transition-all duration-240 ${
-                      isSolution ? 'text-primary' : 'text-muted-foreground hover:text-primary'
+                      isReplying ? 'text-primary' : 'text-muted-foreground hover:text-primary'
                     }`}
                   >
-                    <CheckCircle size={14} weight={isSolution ? 'fill' : 'bold'} /> {isSolution ? 'Solução marcada' : 'Marcar solução'}
+                    <ArrowBendUpLeft size={14} weight="bold" /> Responder
                   </button>
-                )}
-                {currentUser.role === 'conselheiro' || currentUser.role === 'moderador' ? (
+                  {canMarkSolution && (
+                    <button
+                      onClick={() => markSolution(post.id, comment.id)}
+                      className={`flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] transition-all duration-240 ${
+                        isSolution ? 'text-primary' : 'text-muted-foreground hover:text-primary'
+                      }`}
+                    >
+                      <CheckCircle size={14} weight={isSolution ? 'fill' : 'bold'} /> {isSolution ? 'Solução marcada' : 'Marcar solução'}
+                    </button>
+                  )}
+                  {currentUser.role === 'conselheiro' || currentUser.role === 'moderador' ? (
+                    <button
+                      onClick={() => validateAnswer(comment.id)}
+                      className="flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-accent"
+                    >
+                      <SealCheck size={14} weight="bold" /> Validar
+                    </button>
+                  ) : null}
                   <button
-                    onClick={() => validateAnswer(comment.id)}
-                    className="flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-accent"
+                    onClick={() => onReport({ targetType: 'comment', targetId: comment.id, targetAuthorId: comment.authorId, excerpt: stripMarkdown(comment.body).slice(0, 120) })}
+                    aria-label="Denunciar comentário"
+                    className="ml-auto flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-destructive"
                   >
-                    <SealCheck size={14} weight="bold" /> Validar
+                    <Flag size={14} weight="bold" /> Denunciar
                   </button>
-                ) : null}
-                <button
-                  onClick={() => onReport({ targetType: 'comment', targetId: comment.id, targetAuthorId: comment.authorId, excerpt: stripMarkdown(comment.body).slice(0, 120) })}
-                  aria-label="Denunciar comentário"
-                  className="ml-auto flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-destructive"
-                >
-                  <Flag size={14} weight="bold" /> Denunciar
-                </button>
+                </div>
+
+                {isReplying && (
+                  <InlineReplyBox
+                    authorName={author.nickname}
+                    onCancel={onCancelReply}
+                    onSubmit={(text) => onSubmitReply(comment.id, text)}
+                  />
+                )}
+              </>
+            )}
+
+            {!collapsed && hasChildren && (
+              <div className="mt-[10px] flex flex-col">
+                {children.map((child) => (
+                  <CommentNode
+                    key={child.id}
+                    comment={child}
+                    byParent={byParent}
+                    post={post}
+                    depth={depth + 1}
+                    replyingTo={replyingTo}
+                    onStartReply={onStartReply}
+                    onCancelReply={onCancelReply}
+                    onSubmitReply={onSubmitReply}
+                    onReport={onReport}
+                  />
+                ))}
               </div>
-
-              {isReplying && (
-                <InlineReplyBox
-                  authorName={author.nickname}
-                  onCancel={onCancelReply}
-                  onSubmit={(text) => onSubmitReply(comment.id, text)}
-                />
-              )}
-            </div>
+            )}
           </div>
-        </div>
-      )}
-
-      {children.length > 0 && (
-        <div className="flex flex-col">
-          {children.map((child) => (
-            <CommentNode
-              key={child.id}
-              comment={child}
-              byParent={byParent}
-              post={post}
-              depth={depth + 1}
-              replyingTo={replyingTo}
-              onStartReply={onStartReply}
-              onCancelReply={onCancelReply}
-              onSubmitReply={onSubmitReply}
-              onReport={onReport}
-            />
-          ))}
         </div>
       )}
     </div>
@@ -343,10 +400,12 @@ export default function PostDetailPage() {
   // Só um comentário pode estar com a caixa de resposta aberta por vez —
   // ela aparece inline, logo abaixo do comentário respondido.
   const [replyingTo, setReplyingTo] = useState(null)
+  const [commentSort, setCommentSort] = useState('votes')
 
   const post = posts.find((p) => p.id === postId)
   const postComments = useMemo(() => comments.filter((c) => c.postId === postId), [comments, postId])
-  const byParent = useMemo(() => buildTree(postComments), [postComments])
+  const rootCmp = COMMENT_SORTS.find((s) => s.value === commentSort).cmp
+  const byParent = useMemo(() => buildTree(postComments, rootCmp), [postComments, rootCmp])
 
   if (!post) {
     return <EmptyState title="Tópico não encontrado" subtitle="Ele pode ter sido removido pela moderação." />
@@ -478,9 +537,18 @@ export default function PostDetailPage() {
       {/* Árvore de comentários — estilo Reddit: recuo + traço vertical por
           nível, sem card em volta de cada comentário. */}
       <section aria-label="Comentários">
-        <h2 className="mb-[10px] font-anek text-[22px] font-semibold text-foreground">
-          Comentários <span className="font-roboto text-[14px] font-normal text-muted-foreground">({postComments.length})</span>
-        </h2>
+        <div className="mb-[10px] flex flex-wrap items-center justify-between gap-[10px]">
+          <h2 className="font-anek text-[22px] font-semibold text-foreground">
+            Comentários <span className="font-roboto text-[14px] font-normal text-muted-foreground">({postComments.length})</span>
+          </h2>
+          {postComments.length > 1 && (
+            <Segmented
+              options={COMMENT_SORTS.map(({ value, label }) => ({ value, label }))}
+              value={commentSort}
+              onChange={setCommentSort}
+            />
+          )}
+        </div>
         <div className="flex flex-col divide-y divide-border">
           {(byParent.root || []).map((c) => (
             <CommentNode

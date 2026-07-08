@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useApp } from '../context/AppContext'
 import PostCard from '../components/PostCard'
-import TopicStories from '../components/TopicStories'
 import CategoryGrid from '../components/CategoryGrid'
 import { LiveNowBanner, UpcomingLiveCard } from '../components/Live'
 import { EmptyState, Segmented } from '../components/ui'
@@ -66,7 +65,6 @@ export default function HubPage() {
         <CategoryGrid />
       ) : (
         <>
-          <TopicStories />
           <LiveNowBanner />
           <UpcomingLiveCard />
 
