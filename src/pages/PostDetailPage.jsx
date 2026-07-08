@@ -20,7 +20,7 @@ import { VoteControl } from '../components/PostCard'
 import CoverArt from '../components/CoverArt'
 import RichComposer from '../components/RichComposer'
 import { RichText, stripMarkdown } from '../components/RichText'
-import { AreaPill, Avatar, Button, Card, EmptyState, FlairBadge, Modal, RoleLabel, TagPill, TurmaTag } from '../components/ui'
+import { AreaPill, Avatar, Button, Card, EmptyState, FlairBadge, Modal, RoleLabel, Segmented, TagPill, TurmaTag } from '../components/ui'
 import { AREAS, REACTIONS, REPORT_REASONS, timeAgo } from '../data/mock'
 
 // Barra de moderação inline do comentário — mesmo padrão do ModTools de
@@ -154,14 +154,22 @@ function ReactionBar({ commentId }) {
   )
 }
 
-function buildTree(comments) {
+const COMMENT_SORTS = [
+  { value: 'votes', label: 'Mais votados', cmp: (a, b) => b.upvotes - a.upvotes },
+  { value: 'newest', label: 'Mais recentes', cmp: (a, b) => new Date(b.createdAt) - new Date(a.createdAt) },
+  { value: 'oldest', label: 'Mais antigos', cmp: (a, b) => new Date(a.createdAt) - new Date(b.createdAt) },
+]
+
+// Só os comentários de nível raiz seguem o filtro escolhido — as respostas
+// dentro de uma mesma conversa continuam em ordem cronológica, como no Reddit.
+function buildTree(comments, rootCmp) {
   const byParent = {}
   for (const c of comments) {
     const key = c.parentId || 'root'
     ;(byParent[key] ||= []).push(c)
   }
   for (const key of Object.keys(byParent)) {
-    byParent[key].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+    byParent[key].sort(key === 'root' ? rootCmp : (a, b) => new Date(a.createdAt) - new Date(b.createdAt))
   }
   return byParent
 }
@@ -343,10 +351,12 @@ export default function PostDetailPage() {
   // Só um comentário pode estar com a caixa de resposta aberta por vez —
   // ela aparece inline, logo abaixo do comentário respondido.
   const [replyingTo, setReplyingTo] = useState(null)
+  const [commentSort, setCommentSort] = useState('votes')
 
   const post = posts.find((p) => p.id === postId)
   const postComments = useMemo(() => comments.filter((c) => c.postId === postId), [comments, postId])
-  const byParent = useMemo(() => buildTree(postComments), [postComments])
+  const rootCmp = COMMENT_SORTS.find((s) => s.value === commentSort).cmp
+  const byParent = useMemo(() => buildTree(postComments, rootCmp), [postComments, rootCmp])
 
   if (!post) {
     return <EmptyState title="Tópico não encontrado" subtitle="Ele pode ter sido removido pela moderação." />
@@ -478,9 +488,18 @@ export default function PostDetailPage() {
       {/* Árvore de comentários — estilo Reddit: recuo + traço vertical por
           nível, sem card em volta de cada comentário. */}
       <section aria-label="Comentários">
-        <h2 className="mb-[10px] font-anek text-[22px] font-semibold text-foreground">
-          Comentários <span className="font-roboto text-[14px] font-normal text-muted-foreground">({postComments.length})</span>
-        </h2>
+        <div className="mb-[10px] flex flex-wrap items-center justify-between gap-[10px]">
+          <h2 className="font-anek text-[22px] font-semibold text-foreground">
+            Comentários <span className="font-roboto text-[14px] font-normal text-muted-foreground">({postComments.length})</span>
+          </h2>
+          {postComments.length > 1 && (
+            <Segmented
+              options={COMMENT_SORTS.map(({ value, label }) => ({ value, label }))}
+              value={commentSort}
+              onChange={setCommentSort}
+            />
+          )}
+        </div>
         <div className="flex flex-col divide-y divide-border">
           {(byParent.root || []).map((c) => (
             <CommentNode

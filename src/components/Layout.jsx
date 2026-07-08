@@ -60,50 +60,49 @@ export default function Layout({ children }) {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Cabeçalho mobile: um único bloco fixo (logo + ações), para nunca
-          ser afetado pela rolagem — evita o desalinhamento que acontecia ao
-          coordenar uma barra fixa com uma barra "sticky" logo abaixo dela. */}
-      <div className="fixed inset-x-0 top-0 z-50 lg:hidden">
-        <div className="flex h-[84px] items-center justify-center border-b border-border/60 bg-background/70 backdrop-blur-md">
-          <Link to="/" aria-label="Comunidade AUVP — início">
-            <AuvpEscolaLogo className="h-[72px] w-auto text-foreground" />
-          </Link>
-        </div>
-        <div className="flex h-[64px] items-center gap-[10px] border-b border-border/60 bg-background/70 backdrop-blur-md px-4">
-          {/* Menu hamburguer — a navegação inferior não é usada aqui porque a
-              Comunidade roda embutida no SuperApp, que já tem sua própria
-              barra de navegação inferior. */}
-          <button
-            onClick={() => setDrawerOpen(true)}
-            aria-label="Abrir menu de navegação"
-            className="shrink-0 rounded-[5px] p-[8px] text-foreground"
-          >
-            <List size={22} weight="bold" />
-          </button>
-
-          <HeaderSearch className="min-w-0 flex-1" />
-
-          <ThemeToggle />
-
-          <Link
-            to="/notificacoes"
-            className="relative shrink-0 rounded-[5px] p-[8px] text-foreground transition-all duration-240 hover:bg-muted"
-            aria-label={`Notificações${unread ? `, ${unread} não lidas` : ''}`}
-          >
-            <Bell size={20} weight="bold" />
-            {unread > 0 && (
-              <span className="absolute -right-[2px] -top-[2px] flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-destructive px-[4px] font-sora text-[10px] font-bold text-destructive-foreground">
-                {unread}
-              </span>
-            )}
-          </Link>
-
-          <Link to={`/perfil/${currentUser.id}`} aria-label="Meu perfil" className="shrink-0">
-            <Avatar user={currentUser} size={36} showRole={false} />
-          </Link>
-        </div>
+      {/* Cabeçalho mobile: SÓ a barra da logo é fixa (nunca acompanha a
+          rolagem). A barra de ações (busca, sino, avatar) fica no fluxo
+          normal da página e rola junto com o conteúdo abaixo dela. */}
+      <div className="fixed inset-x-0 top-0 z-50 flex h-[84px] items-center justify-center border-b border-border/60 bg-background/70 backdrop-blur-md lg:hidden">
+        <Link to="/" aria-label="Comunidade AUVP — início">
+          <AuvpEscolaLogo className="h-[72px] w-auto text-foreground" />
+        </Link>
       </div>
-      <div className="h-[148px] lg:hidden" aria-hidden />
+      <div className="h-[84px] lg:hidden" aria-hidden />
+
+      <div className="flex h-[64px] items-center gap-[10px] border-b border-border/60 bg-background px-4 lg:hidden">
+        {/* Menu hamburguer — a navegação inferior não é usada aqui porque a
+            Comunidade roda embutida no SuperApp, que já tem sua própria
+            barra de navegação inferior. */}
+        <button
+          onClick={() => setDrawerOpen(true)}
+          aria-label="Abrir menu de navegação"
+          className="shrink-0 rounded-[5px] p-[8px] text-foreground"
+        >
+          <List size={22} weight="bold" />
+        </button>
+
+        <HeaderSearch className="min-w-0 flex-1" />
+
+        <ThemeToggle />
+
+        <Link
+          to="/notificacoes"
+          className="relative shrink-0 rounded-[5px] p-[8px] text-foreground transition-all duration-240 hover:bg-muted"
+          aria-label={`Notificações${unread ? `, ${unread} não lidas` : ''}`}
+        >
+          <Bell size={20} weight="bold" />
+          {unread > 0 && (
+            <span className="absolute -right-[2px] -top-[2px] flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-destructive px-[4px] font-sora text-[10px] font-bold text-destructive-foreground">
+              {unread}
+            </span>
+          )}
+        </Link>
+
+        <Link to={`/perfil/${currentUser.id}`} aria-label="Meu perfil" className="shrink-0">
+          <Avatar user={currentUser} size={36} showRole={false} />
+        </Link>
+      </div>
 
       {/* Cabeçalho desktop — única linha, glass sutil, abaixo da barra
           global do SuperApp. */}
