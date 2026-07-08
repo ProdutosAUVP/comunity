@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowBendUpLeft,
   ArrowFatUp,
@@ -216,6 +216,7 @@ function countDescendants(byParent, commentId) {
 // usadas também para calcular o conector curvo (ver comentário abaixo).
 const RAIL_WIDTH = 32
 const RAIL_GAP = 10
+const ROW_PAD_TOP = 10 // padding-top da linha do comentário (py-[10px]), soma ao offset vertical da curva
 const CURVE_OFFSET = RAIL_WIDTH / 2 + RAIL_GAP // até o centro do trilho do pai
 const CURVE_HEIGHT = RAIL_WIDTH / 2 // até a metade da altura do avatar
 
@@ -239,8 +240,8 @@ function CommentNode({ comment, byParent, post, depth, replyingTo, onStartReply,
     <div id={`comment-${comment.id}`} className="relative">
       {depth > 0 && (
         <span
-          className="pointer-events-none absolute left-0 top-0 rounded-bl-[10px] border-b-2 border-l-2 border-border"
-          style={{ left: `-${CURVE_OFFSET}px`, width: `${CURVE_OFFSET}px`, height: `${CURVE_HEIGHT}px` }}
+          className="pointer-events-none absolute rounded-bl-[10px] border-b border-l border-border"
+          style={{ left: `-${CURVE_OFFSET}px`, top: `${ROW_PAD_TOP}px`, width: `${CURVE_OFFSET}px`, height: `${CURVE_HEIGHT}px` }}
           aria-hidden
         />
       )}
@@ -266,7 +267,7 @@ function CommentNode({ comment, byParent, post, depth, replyingTo, onStartReply,
                 {collapsed ? <Plus size={10} weight="bold" /> : <Minus size={10} weight="bold" />}
               </button>
             )}
-            {!collapsed && hasChildren && <span className="w-[2px] flex-1 bg-border" aria-hidden />}
+            {!collapsed && hasChildren && <span className="w-px flex-1 bg-border" aria-hidden />}
           </div>
 
           <div className="min-w-0 flex-1 pb-[4px]">
@@ -393,6 +394,7 @@ function CommentNode({ comment, byParent, post, depth, replyingTo, onStartReply,
 
 export default function PostDetailPage() {
   const { postId } = useParams()
+  const navigate = useNavigate()
   const { posts, comments, users, postVotes, votePost, addComment, reportContent, toast } = useApp()
   const [commentText, setCommentText] = useState('')
   const [reportTarget, setReportTarget] = useState(null)
@@ -461,8 +463,11 @@ export default function PostDetailPage() {
             </div>
 
             <div className="mt-[15px] flex flex-wrap items-center gap-[8px]">
-              <AreaPill label={AREAS[post.area] || post.area} />
-              <FlairBadge flair={post.flair} />
+              <AreaPill
+                label={AREAS[post.area] || post.area}
+                onClick={() => navigate('/busca', { state: { initialArea: post.area } })}
+              />
+              <FlairBadge flair={post.flair} onClick={() => navigate('/busca', { state: { initialFlair: post.flair } })} />
             </div>
             <h1 className="mt-[8px] font-anek text-[26px] md:text-[34px] font-semibold leading-[1.15] text-foreground">{post.title}</h1>
             <RichText text={post.body} className="mt-[15px] font-roboto text-[17px] leading-[1.6] text-foreground" />
@@ -470,7 +475,7 @@ export default function PostDetailPage() {
             {post.tags.length > 0 && (
               <div className="mt-[15px] flex flex-wrap gap-[8px]">
                 {post.tags.map((t) => (
-                  <TagPill key={t} tag={t} />
+                  <TagPill key={t} tag={t} onClick={() => navigate('/busca', { state: { initialTag: t } })} />
                 ))}
               </div>
             )}

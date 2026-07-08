@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChatCircle } from '@phosphor-icons/react'
 import { useApp } from '../context/AppContext'
@@ -13,14 +13,72 @@ import gifWave from '../assets/bento/wave.gif'
 import gifPulse from '../assets/bento/pulse.gif'
 import gifSparkle from '../assets/bento/sparkle.gif'
 
-// Capas por área — alterna entre as ilustrações abstratas (CoverArt) e os
-// GIFs gerados localmente, na ordem das áreas, só para dar identidade visual
-// a cada categoria sem depender de fotos externas.
-const COVERS = ['chart', gifWave, 'ocean', gifCoin, 'skyline', gifConfetti, 'allocation', gifPulse, gifChart, gifSparkle]
+// Capas de fallback (ilustrações abstratas + GIFs locais) — usadas enquanto o
+// meme do Giphy carrega, ou se a busca falhar/estiver bloqueada na rede.
+const FALLBACK_COVERS = ['chart', gifWave, 'ocean', gifCoin, 'skyline', gifConfetti, 'allocation', gifPulse, gifChart, gifSparkle]
 
-function coverFor(index) {
-  const c = COVERS[index % COVERS.length]
+function fallbackCoverFor(index) {
+  const c = FALLBACK_COVERS[index % FALLBACK_COVERS.length]
   return typeof c === 'string' ? <CoverArt id={c} className="h-full w-full" /> : <img src={c} alt="" className="h-full w-full object-cover" />
+}
+
+// Termo de busca de meme no Giphy para cada área — cada categoria ganha um
+// GIF animado real relacionado ao assunto (mesma chave pública usada no
+// GifPickerModal do RichComposer.jsx).
+const GIPHY_API_KEY = 'dc6zaTOxFJmzC'
+const MEME_QUERY = {
+  avisos: 'attention meme',
+  'bagunca-tema-livre': 'chaos meme funny',
+  depoimentos: 'success story meme',
+  'renda-variavel': 'stock market meme',
+  'renda-fixa': 'safe boring meme',
+  'organizacao-financeira': 'budget spreadsheet meme',
+  'criptomoedas-e-defi': 'bitcoin crypto meme',
+  confissionario: 'confession meme',
+  desafios: 'challenge accepted meme',
+  'previdencia-privada': 'retirement meme',
+  'relacoes-profissionais': 'office meme',
+  'carreira-e-empreendedorismo': 'hustle startup meme',
+  lives: 'live stream meme',
+  'debates-e-resumos-de-aulas': 'studying meme',
+  'sugestoes-e-reclamacoes': 'feedback meme',
+  'precisa-de-ajuda': 'help sos meme',
+  'dicionario-do-mercado': 'confused math lady meme',
+}
+
+// Cache em módulo: cada área busca seu meme uma única vez por sessão, mesmo
+// que o grid remonte (troca de aba, navegação de volta).
+const memeCache = new Map()
+
+function CategoryCover({ areaKey, index }) {
+  const query = MEME_QUERY[areaKey]
+  const [url, setUrl] = useState(() => memeCache.get(areaKey) || null)
+
+  useEffect(() => {
+    if (url || !query) return
+    const controller = new AbortController()
+    fetch(`https://api.giphy.com/v1/gifs/translate?api_key=${GIPHY_API_KEY}&s=${encodeURIComponent(query)}&rating=g`, {
+      signal: controller.signal,
+    })
+      .then((r) => {
+        if (!r.ok) throw new Error('bad status')
+        return r.json()
+      })
+      .then((data) => {
+        const gifUrl = data?.data?.images?.fixed_height?.url || data?.data?.images?.original?.url
+        if (gifUrl) {
+          memeCache.set(areaKey, gifUrl)
+          setUrl(gifUrl)
+        }
+      })
+      .catch(() => {
+        // Rede bloqueada ou sem resultado: mantém a capa de fallback local.
+      })
+    return () => controller.abort()
+  }, [areaKey, query, url])
+
+  if (!url) return fallbackCoverFor(index)
+  return <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />
 }
 
 // Número de seguidores é sintético (a plataforma não modela "seguir uma
@@ -52,7 +110,7 @@ export default function CategoryGrid() {
           followerCount: estimateFollowers(key, areaPosts.length),
           latest,
           latestAuthor,
-          cover: coverFor(index),
+          index,
         }
       }),
     [posts, users],
@@ -68,7 +126,9 @@ export default function CategoryGrid() {
           onClick={() => openCategory(c.key)}
           className="flex flex-col overflow-hidden rounded-[12px] border border-border bg-card text-left transition-all duration-240 hover:shadow-auvp-card hover:-translate-y-[2px]"
         >
-          <div className="h-[110px] w-full shrink-0">{c.cover}</div>
+          <div className="h-[110px] w-full shrink-0">
+            <CategoryCover areaKey={c.key} index={c.index} />
+          </div>
           <div className="flex flex-1 flex-col p-[15px]">
             <div className="flex items-center gap-[8px]">
               <ChatCircle size={16} weight="fill" className="shrink-0 text-primary" />

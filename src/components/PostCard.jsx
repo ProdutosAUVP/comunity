@@ -216,8 +216,20 @@ export default function PostCard({ post, compact = false }) {
           </div>
 
           <div className="mt-[10px] flex flex-wrap items-center gap-[8px]">
-            <AreaPill label={AREAS[post.area] || post.area} />
-            <FlairBadge flair={post.flair} />
+            <AreaPill
+              label={AREAS[post.area] || post.area}
+              onClick={(e) => {
+                e.stopPropagation()
+                navigate('/busca', { state: { initialArea: post.area } })
+              }}
+            />
+            <FlairBadge
+              flair={post.flair}
+              onClick={(e) => {
+                e.stopPropagation()
+                navigate('/busca', { state: { initialFlair: post.flair } })
+              }}
+            />
             <h3 className="font-anek text-[19px] md:text-[22px] font-semibold leading-[1.2] text-foreground">
               {post.title}
             </h3>
@@ -227,7 +239,14 @@ export default function PostCard({ post, compact = false }) {
 
           <div className="mt-[15px] flex flex-wrap items-center gap-[8px]">
             {post.tags.map((t) => (
-              <TagPill key={t} tag={t} />
+              <TagPill
+                key={t}
+                tag={t}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  navigate('/busca', { state: { initialTag: t } })
+                }}
+              />
             ))}
             <span className="ml-auto flex items-center gap-[6px] font-roboto text-[13px] text-muted-foreground">
               <ChatCircle size={16} weight="bold" /> {commentCount} comentários
