@@ -50,13 +50,18 @@ function useGiphy(query, active) {
     const debounce = setTimeout(() => {
       fetch(url, { signal: controller.signal })
         .then((r) => {
+          if (r.status === 429) throw new Error('rate-limited')
           if (!r.ok) throw new Error('bad status')
           return r.json()
         })
         .then((data) => setState({ items: data.data || [], loading: false, error: null }))
         .catch((err) => {
           if (err.name === 'AbortError') return
-          setState({ items: [], loading: false, error: 'Não foi possível carregar os GIFs do Giphy agora. Tente novamente.' })
+          const error =
+            err.message === 'rate-limited'
+              ? 'O Giphy está temporariamente indisponível (limite de uso da chave pública de demonstração atingido). Tente de novo em alguns minutos.'
+              : 'Não foi possível carregar os GIFs do Giphy agora. Tente novamente.'
+          setState({ items: [], loading: false, error })
         })
     }, 350)
     return () => {

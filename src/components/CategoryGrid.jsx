@@ -46,36 +46,70 @@ const MEME_QUERY = {
   'dicionario-do-mercado': 'confused math lady meme',
 }
 
-// Cache em módulo: cada área busca seu meme uma única vez por sessão, mesmo
-// que o grid remonte (troca de aba, navegação de volta).
+// Cache em módulo (memória) + localStorage (entre sessões) — a chave pública
+// de demonstração do Giphy tem limite de uso baixo e compartilhado
+// globalmente com qualquer outro app que a use, então buscar o mesmo meme
+// de novo a cada visita à aba Tópicos esgotaria a cota rapidamente.
+const STORAGE_PREFIX = 'auvp:giphy-cover:'
+const STORAGE_TTL = 7 * 86400e3 // 7 dias
+
 const memeCache = new Map()
+
+function readStoredCover(areaKey) {
+  try {
+    const raw = localStorage.getItem(STORAGE_PREFIX + areaKey)
+    if (!raw) return null
+    const { url, savedAt } = JSON.parse(raw)
+    if (!url || Date.now() - savedAt > STORAGE_TTL) return null
+    return url
+  } catch {
+    return null
+  }
+}
+
+function storeCover(areaKey, url) {
+  try {
+    localStorage.setItem(STORAGE_PREFIX + areaKey, JSON.stringify({ url, savedAt: Date.now() }))
+  } catch {
+    // localStorage indisponível (modo privado, cota cheia etc.) — segue só com o cache em memória.
+  }
+}
 
 function CategoryCover({ areaKey, index }) {
   const query = MEME_QUERY[areaKey]
-  const [url, setUrl] = useState(() => memeCache.get(areaKey) || null)
+  const [url, setUrl] = useState(() => memeCache.get(areaKey) || readStoredCover(areaKey) || null)
 
   useEffect(() => {
     if (url || !query) return
     const controller = new AbortController()
-    fetch(`https://api.giphy.com/v1/gifs/translate?api_key=${GIPHY_API_KEY}&s=${encodeURIComponent(query)}&rating=g`, {
-      signal: controller.signal,
-    })
-      .then((r) => {
-        if (!r.ok) throw new Error('bad status')
-        return r.json()
+    // Escalona as buscas (uma categoria por vez, ~200ms de intervalo) em vez
+    // de disparar todas de uma vez — evita estourar de imediato o limite de
+    // requisições da chave pública quando o grid inteiro monta junto.
+    const delay = setTimeout(() => {
+      fetch(`https://api.giphy.com/v1/gifs/translate?api_key=${GIPHY_API_KEY}&s=${encodeURIComponent(query)}&rating=g`, {
+        signal: controller.signal,
       })
-      .then((data) => {
-        const gifUrl = data?.data?.images?.fixed_height?.url || data?.data?.images?.original?.url
-        if (gifUrl) {
-          memeCache.set(areaKey, gifUrl)
-          setUrl(gifUrl)
-        }
-      })
-      .catch(() => {
-        // Rede bloqueada ou sem resultado: mantém a capa de fallback local.
-      })
-    return () => controller.abort()
-  }, [areaKey, query, url])
+        .then((r) => {
+          if (!r.ok) throw new Error(`status ${r.status}`)
+          return r.json()
+        })
+        .then((data) => {
+          const gifUrl = data?.data?.images?.fixed_height?.url || data?.data?.images?.original?.url
+          if (gifUrl) {
+            memeCache.set(areaKey, gifUrl)
+            storeCover(areaKey, gifUrl)
+            setUrl(gifUrl)
+          }
+        })
+        .catch(() => {
+          // Rede bloqueada, chave sem cota (429) ou sem resultado: mantém a capa de fallback local.
+        })
+    }, index * 200)
+    return () => {
+      controller.abort()
+      clearTimeout(delay)
+    }
+  }, [areaKey, query, url, index])
 
   if (!url) return fallbackCoverFor(index)
   return <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowBendUpLeft,
@@ -231,6 +231,40 @@ function CommentNode({ comment, byParent, post, depth, replyingTo, onStartReply,
   const isReplying = replyingTo === comment.id
   const descendantCount = hasChildren ? countDescendants(byParent, comment.id) : 0
 
+  // O tronco não pode ser um flex-1 "solto" (ele preencheria até o fim de
+  // toda a última resposta, mesmo sem mais nada abaixo dela). Ele precisa
+  // terminar exatamente onde começa a curva da última resposta direta —
+  // e essa distância varia com o conteúdo de cada comentário, então é
+  // medida via DOM em vez de estimada por CSS puro.
+  const trunkRef = useRef(null)
+  const childrenWrapperRef = useRef(null)
+  const [trunkHeight, setTrunkHeight] = useState(0)
+
+  useLayoutEffect(() => {
+    if (!hasChildren || collapsed) return
+    const trunkEl = trunkRef.current
+    const wrapperEl = childrenWrapperRef.current
+    if (!trunkEl || !wrapperEl) return
+
+    const measure = () => {
+      const lastChildEl = wrapperEl.lastElementChild
+      if (!lastChildEl) return
+      // Mede a posição real do próprio tronco (em vez de estimar a partir do
+      // nó + margens), pra não depender de nenhum valor de espaçamento fixo.
+      const trunkTop = trunkEl.getBoundingClientRect().top
+      const lastChildTop = lastChildEl.getBoundingClientRect().top
+      // A curva da própria última resposta já cobre os 16px finais (do
+      // início da sua linha até o centro do avatar) — o tronco só precisa
+      // alcançar o ponto onde aquela curva começa.
+      setTrunkHeight(Math.max(0, lastChildTop - trunkTop + ROW_PAD_TOP))
+    }
+
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(wrapperEl)
+    return () => observer.disconnect()
+  }, [hasChildren, collapsed, children.length])
+
   const hiddenPlaceholder = comment.hidden && !moderationMode
 
   return (
@@ -267,7 +301,9 @@ function CommentNode({ comment, byParent, post, depth, replyingTo, onStartReply,
                 {collapsed ? <Plus size={10} weight="bold" /> : <Minus size={10} weight="bold" />}
               </button>
             )}
-            {!collapsed && hasChildren && <span className="w-px flex-1 bg-border" aria-hidden />}
+            {!collapsed && hasChildren && (
+              <span ref={trunkRef} className="w-px shrink-0 bg-border" style={{ height: `${trunkHeight}px` }} aria-hidden />
+            )}
           </div>
 
           <div className="min-w-0 flex-1 pb-[4px]">
@@ -368,7 +404,7 @@ function CommentNode({ comment, byParent, post, depth, replyingTo, onStartReply,
             )}
 
             {!collapsed && hasChildren && (
-              <div className="mt-[10px] flex flex-col">
+              <div ref={childrenWrapperRef} className="mt-[10px] flex flex-col">
                 {children.map((child) => (
                   <CommentNode
                     key={child.id}
