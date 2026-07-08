@@ -166,116 +166,167 @@ function buildTree(comments) {
   return byParent
 }
 
-function CommentNode({ comment, byParent, post, depth, onReply, onReport }) {
+// Caixa de resposta inline: abre logo abaixo do comentário respondido,
+// empurrando a thread abaixo dela para baixo (fluxo normal do documento,
+// sem overlay) — anima a entrada/saída em vez de aparecer bruscamente.
+function InlineReplyBox({ authorName, onCancel, onSubmit }) {
+  const [text, setText] = useState('')
+  return (
+    <div className="animate-reply-in mt-[10px] rounded-[10px] border border-primary/30 bg-muted/40 p-[12px]">
+      <RichComposer
+        value={text}
+        onChange={setText}
+        rows={3}
+        placeholder={`Respondendo a ${authorName}…`}
+        ariaLabel="Escrever resposta"
+      />
+      <div className="mt-[10px] flex justify-end gap-[10px]">
+        <Button size="xs" variant="ghost" onClick={onCancel}>
+          Cancelar
+        </Button>
+        <Button
+          size="xs"
+          disabled={!text.trim()}
+          onClick={() => {
+            onSubmit(text.trim())
+            setText('')
+          }}
+        >
+          Responder
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+function CommentNode({ comment, byParent, post, depth, replyingTo, onStartReply, onCancelReply, onSubmitReply, onReport }) {
   const { users, commentVotes, voteComment, markSolution, validateAnswer, currentUser, moderationMode } = useApp()
   const author = users[comment.authorId]
   const children = byParent[comment.id] || []
   const isSolution = post.solutionCommentId === comment.id
   const canMarkSolution = post.authorId === currentUser.id
+  const isReplying = replyingTo === comment.id
 
   const hiddenPlaceholder = comment.hidden && !moderationMode
 
   return (
+    // Estilo Reddit: sem card/caixa por comentário — só um traço vertical +
+    // recuo por nível de profundidade, conectando resposta ao pai.
     <div
       id={`comment-${comment.id}`}
-      className={depth > 0 ? 'ml-[15px] border-l-2 border-border pl-[15px] md:ml-[20px] md:pl-[20px]' : ''}
+      className={depth > 0 ? 'ml-[10px] border-l-2 border-border pl-[15px] md:ml-[14px]' : ''}
     >
       {hiddenPlaceholder ? (
-        <div className="rounded-[12px] border border-border bg-card p-[15px] opacity-80">
-          <div className="flex items-center gap-[10px] text-muted-foreground">
-            <EyeSlash size={16} weight="bold" />
-            <p className="font-roboto text-[13px]">Comentário ocultado pela moderação.</p>
-          </div>
+        <div className="flex items-center gap-[8px] py-[10px] text-muted-foreground">
+          <EyeSlash size={15} weight="bold" />
+          <p className="font-roboto text-[13px]">Comentário ocultado pela moderação.</p>
         </div>
       ) : (
-      <div
-        className={`flex flex-col gap-0 rounded-[12px] bg-card border ${
-          isSolution ? 'border-primary/40' : comment.validated ? 'border-accent/40' : 'border-border'
-        }`}
-      >
-        {moderationMode && (
-          <div className="px-[15px] pt-[15px]">
-            <CommentModTools comment={comment} />
-          </div>
-        )}
-        <div className={`flex gap-[12px] ${moderationMode ? 'px-[15px] pb-[15px]' : 'p-[15px]'}`}>
-        <CommentUpvote
-          score={comment.upvotes}
-          active={(commentVotes[comment.id] || 0) === 1}
-          onToggle={() => voteComment(comment.id, 1)}
-        />
-        <div className="min-w-0 flex-1">
-          {(isSolution || comment.validated) && (
-            <div className="mb-[10px] flex flex-wrap gap-[8px]">
-              {isSolution && (
-                <span className="flex items-center gap-[4px] rounded-[4px] bg-primary/10 px-[8px] py-[3px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-primary">
-                  <PushPin size={12} weight="fill" /> Solução do tópico
-                </span>
-              )}
-              {comment.validated && (
-                <span className="flex items-center gap-[4px] rounded-[4px] bg-accent/10 px-[8px] py-[3px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-accent">
-                  <SealCheck size={12} weight="fill" /> Resposta Validada
-                </span>
-              )}
+        <div className="py-[10px]">
+          {moderationMode && (
+            <div className="mb-[10px]">
+              <CommentModTools comment={comment} />
             </div>
           )}
+          <div className="flex gap-[10px]">
+            <CommentUpvote
+              score={comment.upvotes}
+              active={(commentVotes[comment.id] || 0) === 1}
+              onToggle={() => voteComment(comment.id, 1)}
+            />
+            <div className="min-w-0 flex-1">
+              {(isSolution || comment.validated) && (
+                <div className="mb-[8px] flex flex-wrap gap-[8px]">
+                  {isSolution && (
+                    <span className="flex items-center gap-[4px] rounded-[4px] bg-primary/10 px-[8px] py-[3px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-primary">
+                      <PushPin size={12} weight="fill" /> Solução do tópico
+                    </span>
+                  )}
+                  {comment.validated && (
+                    <span className="flex items-center gap-[4px] rounded-[4px] bg-accent/10 px-[8px] py-[3px] font-sora text-[10px] font-bold uppercase tracking-[0.05em] text-accent">
+                      <SealCheck size={12} weight="fill" /> Resposta Validada
+                    </span>
+                  )}
+                </div>
+              )}
 
-          <div className="flex flex-wrap items-center gap-[8px]">
-            <Avatar user={author} size={28} />
-            <Link to={`/perfil/${author.id}`} className="font-roboto text-[13px] font-medium text-foreground hover:underline">
-              {author.nickname}
-            </Link>
-            <RoleLabel user={author} />
-            <TurmaTag turma={author.turma} />
-            <span className="font-roboto text-[12px] text-muted-foreground">· {timeAgo(comment.createdAt)}</span>
-          </div>
+              <div className="flex flex-wrap items-center gap-[8px]">
+                <Avatar user={author} size={26} />
+                <Link to={`/perfil/${author.id}`} className="font-roboto text-[13px] font-medium text-foreground hover:underline">
+                  {author.nickname}
+                </Link>
+                <RoleLabel user={author} />
+                <TurmaTag turma={author.turma} />
+                <span className="font-roboto text-[12px] text-muted-foreground">· {timeAgo(comment.createdAt)}</span>
+              </div>
 
-          <RichText text={comment.body} className="mt-[10px] font-roboto text-[15px] leading-[1.6] text-foreground" />
+              <RichText text={comment.body} className="mt-[6px] font-roboto text-[15px] leading-[1.6] text-foreground" />
 
-          <ReactionBar commentId={comment.id} />
+              <ReactionBar commentId={comment.id} />
 
-          <div className="mt-[10px] flex flex-wrap items-center gap-[10px]">
-          <button
-            onClick={() => onReply(comment)}
-            className="flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-primary"
-          >
-            <ArrowBendUpLeft size={14} weight="bold" /> Responder
-          </button>
-          {canMarkSolution && (
-            <button
-              onClick={() => markSolution(post.id, comment.id)}
-              className={`flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] transition-all duration-240 ${
-                isSolution ? 'text-primary' : 'text-muted-foreground hover:text-primary'
-              }`}
-            >
-              <CheckCircle size={14} weight={isSolution ? 'fill' : 'bold'} /> {isSolution ? 'Solução marcada' : 'Marcar solução'}
-            </button>
-          )}
-          {currentUser.role === 'conselheiro' || currentUser.role === 'moderador' ? (
-            <button
-              onClick={() => validateAnswer(comment.id)}
-              className="flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-accent"
-            >
-              <SealCheck size={14} weight="bold" /> Validar
-            </button>
-          ) : null}
-          <button
-            onClick={() => onReport({ targetType: 'comment', targetId: comment.id, targetAuthorId: comment.authorId, excerpt: stripMarkdown(comment.body).slice(0, 120) })}
-            aria-label="Denunciar comentário"
-            className="ml-auto flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-destructive"
-          >
-            <Flag size={14} weight="bold" /> Denunciar
-          </button>
+              <div className="mt-[8px] flex flex-wrap items-center gap-[10px]">
+                <button
+                  onClick={() => onStartReply(comment.id)}
+                  className={`flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] transition-all duration-240 ${
+                    isReplying ? 'text-primary' : 'text-muted-foreground hover:text-primary'
+                  }`}
+                >
+                  <ArrowBendUpLeft size={14} weight="bold" /> Responder
+                </button>
+                {canMarkSolution && (
+                  <button
+                    onClick={() => markSolution(post.id, comment.id)}
+                    className={`flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] transition-all duration-240 ${
+                      isSolution ? 'text-primary' : 'text-muted-foreground hover:text-primary'
+                    }`}
+                  >
+                    <CheckCircle size={14} weight={isSolution ? 'fill' : 'bold'} /> {isSolution ? 'Solução marcada' : 'Marcar solução'}
+                  </button>
+                )}
+                {currentUser.role === 'conselheiro' || currentUser.role === 'moderador' ? (
+                  <button
+                    onClick={() => validateAnswer(comment.id)}
+                    className="flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-accent"
+                  >
+                    <SealCheck size={14} weight="bold" /> Validar
+                  </button>
+                ) : null}
+                <button
+                  onClick={() => onReport({ targetType: 'comment', targetId: comment.id, targetAuthorId: comment.authorId, excerpt: stripMarkdown(comment.body).slice(0, 120) })}
+                  aria-label="Denunciar comentário"
+                  className="ml-auto flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-destructive"
+                >
+                  <Flag size={14} weight="bold" /> Denunciar
+                </button>
+              </div>
+
+              {isReplying && (
+                <InlineReplyBox
+                  authorName={author.nickname}
+                  onCancel={onCancelReply}
+                  onSubmit={(text) => onSubmitReply(comment.id, text)}
+                />
+              )}
+            </div>
           </div>
         </div>
-        </div>
-      </div>
       )}
 
       {children.length > 0 && (
-        <div className="mt-[10px] flex flex-col gap-[10px]">
+        <div className="flex flex-col">
           {children.map((child) => (
-            <CommentNode key={child.id} comment={child} byParent={byParent} post={post} depth={depth + 1} onReply={onReply} onReport={onReport} />
+            <CommentNode
+              key={child.id}
+              comment={child}
+              byParent={byParent}
+              post={post}
+              depth={depth + 1}
+              replyingTo={replyingTo}
+              onStartReply={onStartReply}
+              onCancelReply={onCancelReply}
+              onSubmitReply={onSubmitReply}
+              onReport={onReport}
+            />
           ))}
         </div>
       )}
@@ -286,10 +337,12 @@ function CommentNode({ comment, byParent, post, depth, onReply, onReport }) {
 export default function PostDetailPage() {
   const { postId } = useParams()
   const { posts, comments, users, postVotes, votePost, addComment, reportContent, toast } = useApp()
-  const [replyTo, setReplyTo] = useState(null)
   const [commentText, setCommentText] = useState('')
   const [reportTarget, setReportTarget] = useState(null)
   const [reportReason, setReportReason] = useState(REPORT_REASONS[0])
+  // Só um comentário pode estar com a caixa de resposta aberta por vez —
+  // ela aparece inline, logo abaixo do comentário respondido.
+  const [replyingTo, setReplyingTo] = useState(null)
 
   const post = posts.find((p) => p.id === postId)
   const postComments = useMemo(() => comments.filter((c) => c.postId === postId), [comments, postId])
@@ -304,10 +357,18 @@ export default function PostDetailPage() {
   const submitComment = (e) => {
     e.preventDefault()
     if (!commentText.trim()) return
-    addComment(post.id, replyTo?.id || null, commentText.trim())
+    addComment(post.id, null, commentText.trim())
     setCommentText('')
-    setReplyTo(null)
     toast('Comentário publicado. O autor do tópico será notificado.')
+  }
+
+  const startReply = (commentId) => setReplyingTo((prev) => (prev === commentId ? null : commentId))
+
+  const submitReply = (parentId, text) => {
+    if (!text.trim()) return
+    addComment(post.id, parentId, text.trim())
+    setReplyingTo(null)
+    toast('Resposta publicada. O autor será notificado.')
   }
 
   const goToSolution = () => {
@@ -395,42 +456,45 @@ export default function PostDetailPage() {
         </div>
       </Card>
 
-      {/* Editor de comentário */}
+      {/* Editor de novo comentário (raiz) — respostas a comentários específicos
+          abrem inline, logo abaixo do comentário respondido. */}
       <Card className="!p-[20px]">
         <form onSubmit={submitComment}>
-          {replyTo && (
-            <div className="mb-[10px] flex items-center justify-between rounded-[5px] bg-muted px-[12px] py-[8px]">
-              <p className="font-roboto text-[13px] text-muted-foreground">
-                Respondendo a <strong className="text-foreground">{users[replyTo.authorId].nickname}</strong>: “{stripMarkdown(replyTo.body).slice(0, 60)}…”
-              </p>
-              <button type="button" onClick={() => setReplyTo(null)} className="font-sora text-[11px] font-bold uppercase text-primary">
-                Cancelar
-              </button>
-            </div>
-          )}
           <RichComposer
             value={commentText}
             onChange={setCommentText}
-            placeholder={replyTo ? 'Escreva sua resposta…' : 'Contribua com o tópico…'}
+            placeholder="Contribua com o tópico…"
             rows={3}
             ariaLabel="Escrever comentário"
           />
           <div className="mt-[10px] flex justify-end">
             <Button size="sm" type="submit" disabled={!commentText.trim()}>
-              {replyTo ? 'Responder' : 'Comentar'}
+              Comentar
             </Button>
           </div>
         </form>
       </Card>
 
-      {/* Árvore de comentários */}
+      {/* Árvore de comentários — estilo Reddit: recuo + traço vertical por
+          nível, sem card em volta de cada comentário. */}
       <section aria-label="Comentários">
-        <h2 className="mb-[15px] font-anek text-[22px] font-semibold text-foreground">
+        <h2 className="mb-[10px] font-anek text-[22px] font-semibold text-foreground">
           Comentários <span className="font-roboto text-[14px] font-normal text-muted-foreground">({postComments.length})</span>
         </h2>
-        <div className="flex flex-col gap-[10px]">
+        <div className="flex flex-col divide-y divide-border">
           {(byParent.root || []).map((c) => (
-            <CommentNode key={c.id} comment={c} byParent={byParent} post={post} depth={0} onReply={setReplyTo} onReport={setReportTarget} />
+            <CommentNode
+              key={c.id}
+              comment={c}
+              byParent={byParent}
+              post={post}
+              depth={0}
+              replyingTo={replyingTo}
+              onStartReply={startReply}
+              onCancelReply={() => setReplyingTo(null)}
+              onSubmitReply={submitReply}
+              onReport={setReportTarget}
+            />
           ))}
           {postComments.length === 0 && <EmptyState title="Seja o primeiro a comentar" subtitle="O autor segue automaticamente este tópico e será notificado." />}
         </div>
