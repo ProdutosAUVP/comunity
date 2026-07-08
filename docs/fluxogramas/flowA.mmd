@@ -1,0 +1,10 @@
+flowchart TD
+    A["Denúncia recebida entra na\nFila Pendente (ModReports)"] --> B["Moderador lê o texto com termos\nsensíveis destacados em amarelo"]
+    B --> C{Qual ação tomar?}
+    C -->|Manter| D["Conteúdo segue no ar"]
+    C -->|Ocultar| E["Ocultado para análise"]
+    C -->|Remover| F["Remoção permanente\n(Soft Delete: status\ndeleted_by_moderator)"]
+    F --> G["Moderador escolhe sanção no\nProntuário do Aluno\n(ex.: 'Mute de 48 horas')"]
+    G --> H["Infração é computada\nno Prontuário"]
+    G --> I["Aluno recebe push in-app\n+ alerta via Blip (WhatsApp)"]
+    G --> J["Ação consolidada em\nModAudit (log imutável)"]

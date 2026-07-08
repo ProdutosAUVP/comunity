@@ -1,0 +1,6 @@
+flowchart TD
+    A["Aluno acessa seu Perfil\nSocial (ProfilePage)"] --> B["Sistema exibe a narrativa visual\nde progresso (Lore: barcos, ilhas)"]
+    B --> C["Aluno acessa SettingsPage e\nsolicita alteração de Apelido"]
+    C --> D["Serviço de IA aplica filtro prévio\n(bloqueia termos políticos,\nreligiosos ou obscenos)"]
+    D --> E["Solicitação entra na fila\nde moderação (ModUsers)"]
+    E --> F["Perfil completo: mostra nome legal\n+ apelido. Nos fóruns: apenas\no apelido aprovado"]

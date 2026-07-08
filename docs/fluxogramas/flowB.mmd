@@ -1,0 +1,7 @@
+flowchart TD
+    A["Aluno solicita apelido protegido\n(ex.: 'Suporte_AUVP')"] --> B["Solicitação fica retida na fila\nde aprovação (ModUsers)"]
+    B --> C["Moderador avalia\na solicitação"]
+    C --> D{Aprovar ou rejeitar?}
+    D -->|Aprovar| E["Apelido é atualizado\ne aluno é notificado"]
+    D -->|Rejeitar| F["Rejeita com motivo (ex.: 'Tentativa\nde se passar por colaborador/\ninstituição')"]
+    F --> G["Apelido revogado à versão anterior\nválida + flag interna acionada\nno perfil do aluno"]

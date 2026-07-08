@@ -1,0 +1,8 @@
+flowchart TD
+    A["Aluno aciona botão de nova\npublicação (CreatePostPage)"] --> B["RichComposer: título + texto\n(+ GIF opcional via Giphy API)"]
+    B --> C["CoverPicker: escolhe\narte de capa"]
+    C --> D["Serviço de IA sugere Tags\nautomáticas com base no texto"]
+    D --> E["Aluno publica o conteúdo\n-> passa a seguir o tópico\nautomaticamente"]
+    E --> F{Um conselheiro validou\numa resposta como solução?}
+    F -->|Sim| G["PostDetailPage destaca a resposta\n(visual do DS) + aviso 'Ir para solução'\nsob a pergunta, mantendo a ordem\ncronológica original"]
+    F -->|Não| H["Discussão segue na ordem\ncronológica normal, sem alterações"]

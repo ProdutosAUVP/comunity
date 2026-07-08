@@ -1,0 +1,10 @@
+flowchart TD
+    A["Aluno abre o SuperApp e acessa\na aba Comunidade (SuperAppShell)"] --> B["HubPage carrega o\nFeed 'Para Você'"]
+    B --> C["Exibe TopicStories institucionais\ne/ou card de Live elegível no topo"]
+    C --> D{Como o aluno quer\nencontrar conteúdo?}
+    D -->|Busca rápida| E["HeaderSearch"]
+    D -->|Navegação visual| F["CategoryGrid\n(nichos)"]
+    D -->|Busca avançada| G["SearchPage\n(palavra-chave, Turma,\nFlair, Data)"]
+    E --> H["Sistema exibe resultados\norganizados por relevância e data"]
+    F --> H
+    G --> H

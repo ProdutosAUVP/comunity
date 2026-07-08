@@ -1,0 +1,9 @@
+flowchart TD
+    A["Aluno acessa o perfil de outro aluno\ne clica em 'Seguir' (dispara push)"] --> B{"Houve reciprocidade -\no outro também\nsegue de volta?"}
+    B -->|Sim| C["Tornam-se 'amigos'\n(ConnectionsPage)"]
+    B -->|Não| D["Segue de forma unidirecional,\nsem status de amizade"]
+    C --> E["Aluno envia uma\nDM (InboxPage)"]
+    D --> E
+    E --> F{"Remetente é amigo\nou Moderador?"}
+    F -->|Sim| G["DM cai na caixa\n'Principal'"]
+    F -->|Não| H["DM cai na caixa\n'Solicitações'"]
