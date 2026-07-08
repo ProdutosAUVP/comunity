@@ -75,7 +75,7 @@ export default function TopicStories() {
     <>
       {/* Bolinhas no topo */}
       <div className="overflow-x-auto scrollbar-thin" role="list" aria-label="Tópicos em alta">
-        <div className="flex gap-[15px] pb-[8px]">
+        <div className="flex gap-[15px] pt-[8px] pb-[8px]">
           {stories.map((post, i) => {
             const author = users[post.authorId]
             const token = FLAIR_TOKENS[post.flair] || 'primary'

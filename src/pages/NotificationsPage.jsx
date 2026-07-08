@@ -6,7 +6,7 @@ import { timeAgo } from '../data/mock'
 
 const TYPE_ICON = {
   reply: ChatCircle,
-  like: ArrowFatUp,
+  voto: ArrowFatUp,
   follow: UserPlus,
   live: Broadcast,
   badge: Medal,

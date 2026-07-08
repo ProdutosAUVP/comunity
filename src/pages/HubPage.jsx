@@ -16,16 +16,19 @@ export default function HubPage() {
   const [feed, setFeed] = useState('foryou')
 
   const visiblePosts = useMemo(() => {
+    // Excluídos (soft delete) nunca voltam a aparecer aqui — só são
+    // recuperáveis via Log de Auditoria (M-05) no dashboard de moderação.
+    const notDeleted = posts.filter((p) => !p.deleted)
     if (feed === 'updates') {
-      return posts.filter((p) => p.feed === 'updates').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      return notDeleted.filter((p) => p.feed === 'updates').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     }
     if (feed === 'following') {
-      return posts
+      return notDeleted
         .filter((p) => currentUser.following.includes(p.authorId))
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     }
     // "Para Você": ordenação simples por afinidade (mesma turma pesa mais) + engajamento
-    return posts
+    return notDeleted
       .filter((p) => p.feed === 'foryou')
       .map((p) => ({ p, score: p.upvotes + (p.turma === currentUser.turma ? 40 : 0) }))
       .sort((a, b) => b.score - a.score)

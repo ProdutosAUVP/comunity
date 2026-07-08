@@ -197,3 +197,90 @@
 .animate-drawer-in {
   animation: auvp-drawer-in 240ms cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+/* ── Jornada do Navegante — elementos lúdicos de pirataria/navegação ──────── */
+@keyframes auvp-boat-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(2deg);
+  }
+}
+.animate-boat-bob {
+  animation: auvp-boat-bob 2.6s ease-in-out infinite;
+}
+
+@keyframes auvp-waves {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-waves {
+  animation: auvp-waves 7s linear infinite;
+}
+
+@keyframes auvp-gull {
+  0% {
+    transform: translate(-10%, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(340%, -14px);
+    opacity: 0;
+  }
+}
+.animate-gull {
+  animation: auvp-gull 9s ease-in-out infinite;
+}
+
+@keyframes auvp-compass-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-compass-spin {
+  animation: auvp-compass-spin 14s linear infinite;
+}
+
+@keyframes auvp-flag-wave {
+  0%,
+  100% {
+    transform: skewY(0deg);
+  }
+  50% {
+    transform: skewY(-6deg);
+  }
+}
+.animate-flag-wave {
+  animation: auvp-flag-wave 1.8s ease-in-out infinite;
+  transform-origin: left center;
+}
+
+@keyframes auvp-x-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.6;
+  }
+}
+.animate-x-pulse {
+  animation: auvp-x-pulse 1.4s ease-in-out infinite;
+}

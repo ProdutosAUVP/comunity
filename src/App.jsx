@@ -9,6 +9,7 @@ import SearchPage from './pages/SearchPage'
 import PostDetailPage from './pages/PostDetailPage'
 import CreatePostPage from './pages/CreatePostPage'
 import ProfilePage from './pages/ProfilePage'
+import ConselheirosPage from './pages/ConselheirosPage'
 import ConnectionsPage from './pages/ConnectionsPage'
 import InboxPage from './pages/InboxPage'
 import NotificationsPage from './pages/NotificationsPage'
@@ -61,6 +62,7 @@ export default function App() {
                     <Route path="/post/:postId" element={<PostDetailPage />} />
                     <Route path="/novo-post" element={<CreatePostPage />} />
                     <Route path="/perfil/:userId" element={<ProfilePage />} />
+                    <Route path="/conselheiros" element={<ConselheirosPage />} />
                     <Route path="/conexoes" element={<ConnectionsPage />} />
                     <Route path="/mensagens" element={<InboxPage />} />
                     <Route path="/notificacoes" element={<NotificationsPage />} />

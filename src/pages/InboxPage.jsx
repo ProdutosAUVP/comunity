@@ -14,6 +14,7 @@ export default function InboxPage() {
   const boxConversations = useMemo(() => conversations.filter((c) => c.box === box), [conversations, box])
   const active = conversations.find((c) => c.id === activeId && c.box === box) || boxConversations[0] || null
   const solicitacoes = conversations.filter((c) => c.box === 'solicitacoes').length
+  const isSupportChat = active?.withId === 'suporte'
 
   const submit = (e) => {
     e.preventDefault()
@@ -36,6 +37,7 @@ export default function InboxPage() {
         options={[
           { value: 'principal', label: 'Principal' },
           { value: 'solicitacoes', label: 'Solicitações', count: solicitacoes },
+          { value: 'suporte', label: 'Suporte' },
         ]}
         value={box}
         onChange={(b) => {
@@ -85,27 +87,40 @@ export default function InboxPage() {
                 <p className="font-roboto text-[15px] font-medium text-foreground">{users[active.withId].nickname}</p>
                 <RoleLabel user={users[active.withId]} />
               </div>
-              <button
-                onClick={() =>
-                  reportContent({
-                    targetType: 'comment',
-                    targetId: active.id,
-                    targetAuthorId: active.withId,
-                    reason: 'Spam',
-                    excerpt: active.messages[active.messages.length - 1]?.text || '',
-                  })
-                }
-                className="flex items-center gap-[4px] rounded-[5px] px-[8px] py-[6px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-destructive"
-              >
-                <Flag size={14} weight="bold" /> Denunciar
-              </button>
-              <button
-                onClick={() => setConfirmBlock(active.withId)}
-                className="flex items-center gap-[4px] rounded-[5px] px-[8px] py-[6px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-destructive"
-              >
-                <Prohibit size={14} weight="bold" /> Bloquear
-              </button>
+              {!isSupportChat && (
+                <>
+                  <button
+                    onClick={() =>
+                      reportContent({
+                        targetType: 'comment',
+                        targetId: active.id,
+                        targetAuthorId: active.withId,
+                        reason: 'Spam',
+                        excerpt: active.messages[active.messages.length - 1]?.text || '',
+                      })
+                    }
+                    className="flex items-center gap-[4px] rounded-[5px] px-[8px] py-[6px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-destructive"
+                  >
+                    <Flag size={14} weight="bold" /> Denunciar
+                  </button>
+                  <button
+                    onClick={() => setConfirmBlock(active.withId)}
+                    className="flex items-center gap-[4px] rounded-[5px] px-[8px] py-[6px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-destructive"
+                  >
+                    <Prohibit size={14} weight="bold" /> Bloquear
+                  </button>
+                </>
+              )}
             </div>
+
+            {isSupportChat && (
+              <div className="mt-[12px] rounded-[8px] bg-muted p-[12px]">
+                <p className="font-roboto text-[13px] text-muted-foreground">
+                  Canal exclusivo de suporte da AUVP — tire dúvidas sobre a plataforma, cursos ou sua conta diretamente com a
+                  nossa equipe.
+                </p>
+              </div>
+            )}
 
             {active.box === 'solicitacoes' && (
               <div className="mt-[12px] flex flex-wrap items-center gap-[10px] rounded-[8px] bg-muted p-[12px]">

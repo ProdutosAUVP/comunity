@@ -37,35 +37,135 @@ export const FLAIRS = {
 
 export const TURMAS = ['Turma 38', 'Turma 40', 'Turma 42', 'Turma 43']
 
+// ── Áreas (fóruns) ───────────────────────────────────────────────────────
+// Cada tópico pertence a exatamente uma área — espelham 1:1 as categorias
+// reais da Comunidade AUVP (grupo "Comunidade AUVP" + as de "AUVP -
+// Exclusivo para alunos" relevantes ao módulo geral). Tags (mais abaixo)
+// são específicas dentro de uma área: um ticker, um fundo, um diagrama
+// nomeado do PIAR — não uma categoria ampla.
+export const AREAS = {
+  avisos: 'Avisos',
+  'bagunca-tema-livre': 'Bagunçinha (Tema Livre)',
+  depoimentos: 'Depoimentos',
+  'renda-variavel': 'Renda Variável',
+  'renda-fixa': 'Renda Fixa',
+  'organizacao-financeira': 'Organização Financeira',
+  'criptomoedas-e-defi': 'Criptomoedas e De-fi',
+  confissionario: 'Confissionário (Anônimo)',
+  desafios: 'Desafios',
+  'previdencia-privada': 'Previdência Privada',
+  'relacoes-profissionais': 'Relações Profissionais (Network)',
+  'carreira-e-empreendedorismo': 'Carreira & Empreendedorismo (Conselho Sinceros)',
+  lives: 'Lives',
+  'debates-e-resumos-de-aulas': 'Debates e Resumos de Aulas',
+  'sugestoes-e-reclamacoes': 'Sugestões & Reclamações',
+  'precisa-de-ajuda': 'Precisa de Ajuda (Plataforma ou Curso)',
+  'dicionario-do-mercado': 'Dicionário do Mercado',
+}
+
+// Descrições reais de cada área, exibidas no topo da listagem da área.
+export const AREA_DESCRIPTIONS = {
+  avisos:
+    'Somente colaboradores da AUVP podem criar tópicos nesse espaço. Todos os avisos referentes à comunidade ou à plataforma serão publicados aqui primeiro.',
+  'bagunca-tema-livre':
+    'Nada sério deve ser discutido aqui — converse sobre assuntos aleatórios, puxe um papo legal, tudo é válido, menos ser chato. Se você quer criar um tópico sério, procure outra seção.',
+  depoimentos: 'Se você quiser deixar um depoimento sobre a AUVP, esse é o lugar — e a gente agradece :)',
+  'renda-variavel':
+    'Quer conversar sobre ações, fundos imobiliários ou outros temas pertinentes à Renda Variável? Antes de criar um tópico, faça uma pesquisa — talvez alguém já tenha criado um semelhante.',
+  'renda-fixa': 'CDBs, LCIs, LCAs, CRIs, CRAs, Debêntures, Tesouro Direto e tudo mais? Esse é o lugar!',
+  'organizacao-financeira':
+    'Vale a pena comprar à vista ou parcelado? Qual o melhor cartão para milhas? Onde deixar a sua reserva de emergência? Aqui você pode conversar sobre isso e qualquer assunto da sua vida financeira cotidiana.',
+  'criptomoedas-e-defi': 'Quer debater sobre o novo whitepaper do momento, P2P ou o futuro do Bitcoin? Esse é o espaço.',
+  confissionario:
+    'Fez besteira e está precisando de um conselho? Crie seu tópico, conte sua história — mas poste anonimamente, sem usar seu nome nesse recinto.',
+  desafios:
+    'Desafios são postados regularmente para lutarmos contra o nosso próprio fracasso, buscando 1% de melhoria em qualquer área da vida. Convide ou aceite desafios de outros membros.',
+  'previdencia-privada': 'PGBL, VGBL e planejamento para a aposentadoria complementar.',
+  'relacoes-profissionais': 'Ofereça os seus serviços e encontre bons profissionais.',
+  'carreira-e-empreendedorismo':
+    'Espaço para discussões práticas sobre carreira, negócios e crescimento profissional. O foco é compartilhar desafios reais e receber visões diretas e imparciais — a proposta não é validação, é evolução.',
+  lives: 'Aulas ao vivo com o Raul, sempre às segundas-feiras às 19h. Não pôde assistir? A gravação fica disponível depois.',
+  'debates-e-resumos-de-aulas':
+    'Se você tem uma ideia e eu outra, e as dividimos, ambos ficamos com duas ideias cada. A melhor forma de aprender é compartilhando o que você sabe com outra pessoa.',
+  'sugestoes-e-reclamacoes': 'Encontrou algum problema em qualquer uma das nossas plataformas? Quer sugerir uma melhoria ou reclamar de algo? Estamos aqui para te atender.',
+  'precisa-de-ajuda':
+    'Dúvida sobre alguma aula ou investimento específico? É só compartilhar aqui — nossos alunos mais experientes e moderadores ajudam a resolver.',
+  'dicionario-do-mercado': 'O que é IPO? E Follow-on? O que significa a sigla DARF? Um conjunto de definições dos termos do mercado financeiro.',
+}
+
+// Sugestão automática de área (simula IA por palavras-chave)
+export const AREA_KEYWORDS = {
+  avisos: ['comunicado', 'aviso oficial', 'manutenção programada'],
+  'bagunca-tema-livre': ['off-topic', 'zoeira', 'bagunça'],
+  depoimentos: ['depoimento', 'meu depoimento sobre a auvp'],
+  'renda-variavel': ['ação', 'ações', 'bolsa', 'ibovespa', 'fii', 'fiis', 'fundo imobiliário', 'day trade'],
+  'renda-fixa': ['cdb', 'lci', 'lca', 'renda fixa', 'cdi', 'prefixado', 'tesouro', 'selic', 'ipca+'],
+  'organizacao-financeira': ['organização financeira', 'planilha', 'orçamento', 'reserva de emergência', 'cartão'],
+  'criptomoedas-e-defi': ['bitcoin', 'cripto', 'criptomoeda', 'defi', 'blockchain', 'ouro'],
+  confissionario: ['confissão', 'anônimo', 'vergonha', 'ninguém sabe'],
+  desafios: ['desafio', 'meta de 30 dias', 'sem gastar'],
+  'previdencia-privada': ['previdência', 'pgbl', 'vgbl', 'aposentadoria'],
+  'relacoes-profissionais': ['network', 'indicação de emprego', 'vaga', 'linkedin'],
+  'carreira-e-empreendedorismo': ['carreira', 'empreender', 'empreendedorismo', 'negócio próprio', 'clt', 'pj'],
+  lives: ['live', 'aula ao vivo'],
+  'debates-e-resumos-de-aulas': ['aula', 'módulo', 'resumo de aula'],
+  'sugestoes-e-reclamacoes': ['sugestão', 'reclamação', 'bug', 'problema na plataforma'],
+  'precisa-de-ajuda': ['dúvida sobre a aula', 'dúvida sobre o curso', 'não entendi a aula'],
+  'dicionario-do-mercado': ['o que é', 'significado de', 'sigla'],
+}
+
+// ── Tags (específicas) ─────────────────────────────────────────────────
+// Muito mais granulares que a área: um ticker, um fundo, um diagrama do
+// PIAR com nome próprio. Nem todo post precisa de uma — a maioria não tem.
 export const ALL_TAGS = [
-  'fundos-imobiliarios',
-  'renda-fixa',
-  'acoes',
-  'imposto-de-renda',
-  'reserva-de-emergencia',
-  'tesouro-direto',
-  'dividendos',
-  'previdencia',
-  'internacional',
-  'planejamento',
-  'piar',
-  'escola-auvp',
+  'WEG3',
+  'PETR4',
+  'VALE3',
+  'ITSA4',
+  'BBAS3',
+  'HGLG11',
+  'KNRI11',
+  'MXRF11',
+  'XPML11',
+  'Tesouro Selic 2029',
+  'Tesouro IPCA+ 2035',
+  'Tesouro Prefixado 2027',
+  'Bitcoin',
+  'Ethereum',
+  'Ouro (XAU)',
+  'Diagrama do Cerrado',
+  'Diagrama do Atlântico',
+  'Diagrama da Amazônia',
 ]
 
-// Sugestão automática de tags (simula IA por palavras-chave)
+// Sugestão automática de tags específicas (simula IA por palavras-chave)
 export const TAG_KEYWORDS = {
-  'fundos-imobiliarios': ['fii', 'fiis', 'fundo imobiliário', 'fundos imobiliários', 'aluguel', 'imobiliário', 'imobiliprivate'],
-  'renda-fixa': ['cdb', 'lci', 'lca', 'renda fixa', 'cdi', 'prefixado', 'pós-fixado'],
-  acoes: ['ação', 'ações', 'bolsa', 'ibovespa', 'empresa', 'valuation'],
-  'imposto-de-renda': ['imposto', 'ir ', 'darf', 'tributação', 'declarar', 'declaração'],
-  'reserva-de-emergencia': ['reserva', 'emergência', 'liquidez'],
-  'tesouro-direto': ['tesouro', 'selic', 'ipca+'],
-  dividendos: ['dividendo', 'dividendos', 'provento', 'proventos', 'jcp'],
-  previdencia: ['previdência', 'pgbl', 'vgbl', 'aposentadoria'],
-  internacional: ['dólar', 'internacional', 'exterior', 'etf', 'reit'],
-  planejamento: ['planejamento', 'orçamento', 'meta', 'objetivo'],
-  piar: ['piar', 'alocação', 'diagrama'],
-  'escola-auvp': ['aula', 'módulo', 'escola', 'curso'],
+  WEG3: ['weg3', 'weg '],
+  PETR4: ['petr4', 'petrobras'],
+  VALE3: ['vale3', 'vale '],
+  ITSA4: ['itsa4', 'itaúsa'],
+  BBAS3: ['bbas3', 'banco do brasil'],
+  HGLG11: ['hglg11'],
+  KNRI11: ['knri11'],
+  MXRF11: ['mxrf11'],
+  XPML11: ['xpml11'],
+  'Tesouro Selic 2029': ['tesouro selic 2029'],
+  'Tesouro IPCA+ 2035': ['tesouro ipca+ 2035', 'ipca+ 2035'],
+  'Tesouro Prefixado 2027': ['prefixado 2027'],
+  Bitcoin: ['bitcoin', 'btc'],
+  Ethereum: ['ethereum', 'eth'],
+  'Ouro (XAU)': ['ouro', 'xau'],
+  'Diagrama do Cerrado': ['diagrama do cerrado'],
+  'Diagrama do Atlântico': ['diagrama do atlântico'],
+  'Diagrama da Amazônia': ['diagrama da amazônia'],
+}
+
+export function suggestArea(text) {
+  const lower = ` ${text.toLowerCase()} `
+  for (const [area, keywords] of Object.entries(AREA_KEYWORDS)) {
+    if (keywords.some((k) => lower.includes(k))) return area
+  }
+  return null
 }
 
 // ── Usuários ───────────────────────────────────────────────────────────────
@@ -84,6 +184,10 @@ export const USERS = {
     badges: ['b1', 'b2', 'b3', 'b5'],
     infractions: 0,
     joinedAt: daysAgo(210),
+    // Elegibilidade do Programa de Conselheiros: AUVP Sempre ativo OU
+    // dentro das primeiras 8 semanas (56 dias) de Escola AUVP.
+    auvpSempreAtivo: true,
+    escolaStartedAt: daysAgo(210),
     piarOptIn: true,
     piar: [
       { label: 'Renda Fixa', value: 40 },
@@ -215,6 +319,54 @@ export const USERS = {
     infractions: 0,
     joinedAt: daysAgo(300),
   },
+  // ── Conselheiros do Programa de Conselheiros (conversas 1:1 agendadas) ──
+  // Alunos/clientes voluntários e experientes — distintos dos conselheiros
+  // técnicos do fórum (u2, u3), que respondem dúvidas de investimento.
+  u10: {
+    id: 'u10',
+    name: 'Camila Torres',
+    nickname: 'camila.torres',
+    turma: 'Turma 35',
+    role: 'conselheiro',
+    xp: 5400,
+    initials: 'CT',
+    bio: 'Mudei de carreira aos 34 anos, de advocacia para produto. Ofereço conversas sobre transição de carreira e decisões difíceis.',
+    followers: ['u1'],
+    following: [],
+    badges: ['b1'],
+    infractions: 0,
+    joinedAt: daysAgo(650),
+  },
+  u11: {
+    id: 'u11',
+    name: 'Marcelo Vidigal',
+    nickname: 'marcelo.vidigal',
+    turma: 'Turma 30',
+    role: 'conselheiro',
+    xp: 8100,
+    initials: 'MV',
+    bio: 'Empreendedor, abri e fechei um negócio antes de acertar o segundo. Converso sobre empreendedorismo, riscos e momentos de virada.',
+    followers: [],
+    following: [],
+    badges: ['b1'],
+    infractions: 0,
+    joinedAt: daysAgo(800),
+  },
+  u12: {
+    id: 'u12',
+    name: 'Juliana Prado',
+    nickname: 'ju.prado',
+    turma: 'Turma 33',
+    role: 'conselheiro',
+    xp: 6900,
+    initials: 'JP',
+    bio: 'Casada há 12 anos, já brigou e fez as pazes com o orçamento do casal várias vezes. Converso sobre dinheiro a dois e relacionamentos.',
+    followers: [],
+    following: [],
+    badges: ['b1'],
+    infractions: 0,
+    joinedAt: daysAgo(710),
+  },
   auvp: {
     id: 'auvp',
     name: 'AUVP Oficial',
@@ -224,6 +376,21 @@ export const USERS = {
     xp: 0,
     initials: 'AU',
     bio: 'Canal oficial de novidades, eventos, releases e comunicados da AUVP.',
+    followers: [],
+    following: [],
+    badges: [],
+    infractions: 0,
+    joinedAt: daysAgo(1000),
+  },
+  suporte: {
+    id: 'suporte',
+    name: 'Suporte AUVP',
+    nickname: 'Suporte AUVP',
+    turma: 'Institucional',
+    role: 'oficial',
+    xp: 0,
+    initials: 'SP',
+    bio: 'Canal de suporte para dúvidas sobre a plataforma, cursos e questões de conta.',
     followers: [],
     following: [],
     badges: [],
@@ -257,7 +424,8 @@ export const LIVES = [
   {
     id: 'live1',
     title: 'Análise ao vivo: cenário de juros e impacto nos FIIs',
-    host: 'Ricardo Fontes (Conselheiro)',
+    host: 'Raul Sena (Conselheiro)',
+    hostPhoto: true,
     status: 'live', // acontecendo agora → modal no topo do Hub
     startsAt: hoursAgo(0.5),
     eligible: true,
@@ -284,7 +452,8 @@ export const POSTS = [
     title: 'Como declarar FIIs no imposto de renda pela primeira vez?',
     body: 'Comprei minhas primeiras cotas de fundos imobiliários em 2025 e agora estou perdido com a declaração. Preciso declarar mesmo sem ter vendido nada? Os dividendos isentos entram onde? Alguém da turma pode me ajudar com um passo a passo?',
     flair: 'Dúvida',
-    tags: ['fundos-imobiliarios', 'imposto-de-renda'],
+    area: 'renda-variavel',
+    tags: [],
     turma: 'Turma 42',
     createdAt: hoursAgo(5),
     upvotes: 34,
@@ -298,7 +467,8 @@ export const POSTS = [
     title: 'Nova live hoje às 19h: cenário de juros e impacto nos FIIs',
     body: 'A live desta semana com o conselheiro Ricardo Fontes acontece hoje às 19h. Material de apoio já disponível na área da live. Alunos das turmas 40, 42 e 43 são elegíveis.',
     flair: 'Live',
-    tags: ['fundos-imobiliarios', 'escola-auvp'],
+    area: 'lives',
+    tags: [],
     turma: 'Institucional',
     createdAt: hoursAgo(8),
     upvotes: 120,
@@ -311,12 +481,14 @@ export const POSTS = [
     title: 'Case: como montei minha reserva de emergência em 8 meses',
     body: 'Quero compartilhar com a turma como saí do zero até 6 meses de custo de vida guardados. Usei uma combinação de Tesouro Selic e CDB de liquidez diária, com aporte automático todo dia 5. O ponto de virada foi tratar a reserva como uma "conta obrigatória", não como sobra do mês.',
     flair: 'Case',
-    tags: ['reserva-de-emergencia', 'renda-fixa', 'planejamento'],
+    area: 'organizacao-financeira',
+    tags: [],
     turma: 'Turma 42',
     createdAt: daysAgo(1.2),
     upvotes: 89,
     feed: 'foryou',
     solutionCommentId: null,
+    cover: 'ocean',
   },
   {
     id: 'p4',
@@ -324,13 +496,15 @@ export const POSTS = [
     title: 'Tesouro IPCA+ ou prefixado para objetivo de 10 anos?',
     body: 'Meu objetivo é a aposentadoria complementar em ~10 anos. Estou em dúvida entre travar uma taxa prefixada agora ou ir de IPCA+ para proteger da inflação. Como vocês pensam essa decisão dentro do método AUVP?',
     flair: 'Dúvida',
-    tags: ['tesouro-direto', 'renda-fixa', 'previdencia'],
+    area: 'renda-fixa',
+    tags: ['Tesouro IPCA+ 2035'],
     turma: 'Turma 40',
     createdAt: daysAgo(2),
     upvotes: 41,
     feed: 'foryou',
     solutionCommentId: null,
     suggestedLesson: { module: 'Módulo 4 — Renda Fixa', lesson: 'Aula 6: Indexadores e prazos' },
+    cover: 'chart',
   },
   {
     id: 'p5',
@@ -338,7 +512,8 @@ export const POSTS = [
     title: 'Release: nova Calculadora de Rendimentos no SuperApp',
     body: 'A calculadora de rendimentos foi atualizada com simulação de aportes mensais e comparação entre CDI, IPCA+ e prefixado. Disponível para todos os alunos na aba Ferramentas.',
     flair: 'Aula',
-    tags: ['escola-auvp', 'renda-fixa'],
+    area: 'avisos',
+    tags: [],
     turma: 'Institucional',
     createdAt: daysAgo(2.5),
     upvotes: 76,
@@ -351,7 +526,8 @@ export const POSTS = [
     title: 'Quando o gerente do banco descobre que você fez a Escola AUVP',
     body: 'Fui "convidado" para uma reunião sobre um COE imperdível. Recusei educadamente citando a aula de produtos estruturados. A cara dele não tinha preço.',
     flair: 'Meme',
-    tags: ['escola-auvp'],
+    area: 'bagunca-tema-livre',
+    tags: [],
     turma: 'Turma 43',
     createdAt: daysAgo(3),
     upvotes: 214,
@@ -364,7 +540,8 @@ export const POSTS = [
     title: 'Conquista: primeiro aporte internacional realizado!',
     body: 'Depois do módulo de investimentos no exterior, finalmente abri conta e fiz meu primeiro aporte em ETF internacional. Obrigada à comunidade pelas dicas na minha dúvida da semana passada.',
     flair: 'Conquista',
-    tags: ['internacional', 'planejamento'],
+    area: 'renda-variavel',
+    tags: [],
     turma: 'Turma 40',
     createdAt: daysAgo(4),
     upvotes: 132,
@@ -377,7 +554,8 @@ export const POSTS = [
     title: 'Comunicado: manutenção programada do SuperApp neste sábado',
     body: 'No sábado, das 02h às 05h, o SuperApp passará por manutenção. A comunidade ficará em modo somente leitura nesse período.',
     flair: 'Aula',
-    tags: ['escola-auvp'],
+    area: 'avisos',
+    tags: [],
     turma: 'Institucional',
     createdAt: daysAgo(5),
     upvotes: 18,
@@ -390,7 +568,8 @@ export const POSTS = [
     title: 'Vale a pena manter previdência PGBL do banco antigo?',
     body: 'Tenho um PGBL antigo com taxa de administração de 2,5% a.a. e carregamento na saída. Faço a portabilidade ou resgato e invisto por conta? Declaro no modelo completo.',
     flair: 'Dúvida',
-    tags: ['previdencia', 'imposto-de-renda', 'planejamento'],
+    area: 'previdencia-privada',
+    tags: [],
     turma: 'Turma 42',
     createdAt: hoursAgo(14),
     upvotes: 27,
@@ -403,12 +582,14 @@ export const POSTS = [
     title: 'Dúvida sobre rebalanceamento com o PIAR',
     body: 'Meu diagrama do PIAR está apontando 8% de desvio em FIIs depois da alta do mês. Vocês rebalanceiam vendendo ou apenas direcionando os novos aportes? Qual o critério de vocês para o desvio máximo tolerado?',
     flair: 'Dúvida',
-    tags: ['piar', 'fundos-imobiliarios', 'planejamento'],
+    area: 'organizacao-financeira',
+    tags: ['Diagrama do Cerrado'],
     turma: 'Turma 42',
     createdAt: daysAgo(6),
     upvotes: 55,
     feed: 'foryou',
     solutionCommentId: 'c12',
+    cover: 'allocation',
   },
   {
     id: 'p11',
@@ -416,12 +597,14 @@ export const POSTS = [
     title: 'Análise da semana: o que olhar em relatórios gerenciais de FIIs',
     body: 'Publiquei um roteiro objetivo do que verificar todo mês nos relatórios gerenciais: vacância, inadimplência, cronograma de vencimento de contratos, alavancagem e distribuição vs. resultado. Sigam o roteiro antes de reagir a qualquer queda de cota.',
     flair: 'Aula',
-    tags: ['fundos-imobiliarios', 'dividendos'],
+    area: 'renda-variavel',
+    tags: ['HGLG11', 'KNRI11'],
     turma: 'Turma 38',
     createdAt: daysAgo(1),
     upvotes: 167,
     feed: 'foryou',
     solutionCommentId: null,
+    cover: 'skyline',
   },
   {
     id: 'p12',
@@ -429,7 +612,8 @@ export const POSTS = [
     title: 'URGENTE: grupo VIP com sinais de day trade, chama no privado',
     body: 'Galera, montei um grupo com sinais certeiros de day trade, resultados garantidos de 5% ao dia. Quem quiser entrar me chama no privado que passo o link.',
     flair: 'Case',
-    tags: ['acoes'],
+    area: 'renda-variavel',
+    tags: [],
     turma: 'Turma 43',
     createdAt: hoursAgo(6),
     upvotes: -12,
@@ -437,7 +621,150 @@ export const POSTS = [
     solutionCommentId: null,
     hidden: true, // ocultado temporariamente pela moderação
   },
+  // ── Posts refletindo os canais reais da comunidade AUVP (Discord) ────────
+  {
+    id: 'p13',
+    authorId: 'u9',
+    title: 'Vale a pena ter uma pequena posição em ouro na carteira?',
+    body: 'Tenho visto muita gente falando de ouro como proteção em cenário de instabilidade global. Faz sentido destinar uns 5% da carteira via ETF de ouro, ou isso foge do método AUVP de simplicidade?',
+    flair: 'Dúvida',
+    area: 'criptomoedas-e-defi',
+    tags: ['Ouro (XAU)'],
+    turma: 'Turma 40',
+    createdAt: hoursAgo(9),
+    upvotes: 22,
+    feed: 'foryou',
+    solutionCommentId: null,
+  },
+  {
+    id: 'p14',
+    authorId: 'u7',
+    title: 'Bitcoin como reserva de valor: exagero ou faz sentido em 2026?',
+    body: 'Depois da aula de ativos alternativos fiquei na dúvida: bitcoin entra na conversa de "renda variável" ou é uma classe totalmente à parte? Como vocês enxergam isso dentro de uma carteira de longo prazo?',
+    flair: 'Dúvida',
+    area: 'criptomoedas-e-defi',
+    tags: ['Bitcoin'],
+    turma: 'Turma 43',
+    createdAt: hoursAgo(30),
+    upvotes: 38,
+    feed: 'foryou',
+    solutionCommentId: null,
+  },
+  {
+    id: 'p15',
+    authorId: 'u6',
+    title: 'Minha planilha de organização financeira mensal (compartilhando)',
+    body: 'Depois de meses ajustando, cheguei numa planilha simples de orçamento doméstico que separa essenciais, desejos e investimentos automaticamente a partir do extrato. Deixo o link nos comentários para quem quiser copiar.',
+    flair: 'Case',
+    area: 'organizacao-financeira',
+    tags: [],
+    turma: 'Turma 40',
+    createdAt: daysAgo(3),
+    upvotes: 145,
+    feed: 'foryou',
+    solutionCommentId: null,
+  },
+  {
+    id: 'p16',
+    authorId: 'u5',
+    title: 'Confissionário: já resgatei a reserva de emergência pra viagem',
+    body: 'Ninguém sabe disso além de vocês aqui: mês passado resgatei metade da minha reserva pra uma viagem "imperdível". Já reforcei o valor no meu planejamento, mas confesso que doeu ver o número cair no extrato.',
+    flair: 'Meme',
+    area: 'confissionario',
+    tags: [],
+    turma: 'Turma 42',
+    createdAt: hoursAgo(15),
+    upvotes: 96,
+    feed: 'foryou',
+    solutionCommentId: null,
+  },
+  {
+    id: 'p17',
+    authorId: 'u1',
+    title: 'Desafio dos 30 dias sem gastos supérfluos — quem topa comigo?',
+    body: 'Vou tentar 30 dias cortando qualquer gasto que não seja essencial ou investimento, só pra testar meu próprio limite de disciplina. Quem quiser topar o desafio comigo, comenta aqui que a gente se cobra mutuamente!',
+    flair: 'Case',
+    area: 'desafios',
+    tags: [],
+    turma: 'Turma 42',
+    createdAt: hoursAgo(20),
+    upvotes: 71,
+    feed: 'foryou',
+    solutionCommentId: null,
+  },
+  {
+    id: 'p18',
+    authorId: 'u2',
+    title: 'Network: alguém trabalha com análise de crédito e topa um bate-papo?',
+    body: 'Estou migrando de carreira para o mercado financeiro e queria trocar uma ideia com quem já atua com análise de crédito ou risco. Sei que tem gente da turma nessa área — bora conectar?',
+    flair: 'Dúvida',
+    area: 'relacoes-profissionais',
+    tags: [],
+    turma: 'Turma 38',
+    createdAt: daysAgo(1.5),
+    upvotes: 19,
+    feed: 'foryou',
+    solutionCommentId: null,
+  },
+  {
+    id: 'p19',
+    authorId: 'u9',
+    title: 'Larguei o emprego CLT pra empreender — o que aprendi sobre dinheiro',
+    body: 'Depois de 8 anos de CLT, resolvi abrir minha própria consultoria. O maior aprendizado não foi sobre o negócio em si, mas sobre como precisei reforçar a reserva de emergência ANTES de dar esse passo. Deixo esse relato pra quem está pensando em empreender.',
+    flair: 'Case',
+    area: 'carreira-e-empreendedorismo',
+    tags: [],
+    turma: 'Turma 40',
+    createdAt: daysAgo(4),
+    upvotes: 203,
+    feed: 'foryou',
+    solutionCommentId: null,
+  },
+  {
+    id: 'p20',
+    authorId: 'u6',
+    title: 'Vitrine: bati a primeira carteira de 6 dígitos!',
+    body: 'Print em anexo mostrando que finalmente cruzei a marca de 6 dígitos investidos. 3 anos de aportes mensais consistentes e muita paciência com a renda fixa. Obrigada à comunidade pelas trocas!',
+    flair: 'Conquista',
+    area: 'organizacao-financeira',
+    tags: [],
+    turma: 'Turma 40',
+    createdAt: hoursAgo(11),
+    upvotes: 187,
+    feed: 'foryou',
+    solutionCommentId: null,
+  },
 ]
+
+// ── Reações de comentário (além do upvote) ──────────────────────────────────
+// Substituem o downvote em comentários: em vez de permitir que a galera se
+// junte anonimamente para "afundar" alguém, canalizamos o sentimento negativo
+// (e o bom humor) em reações nomeadas e públicas.
+export const REACTIONS = [
+  { key: 'brabo', label: 'Brabo' },
+  { key: 'aula', label: 'Aí cê deu aula' },
+  { key: 'ajudou', label: 'Me ajudou' },
+  { key: 'haha', label: 'Hahaha' },
+  { key: 'merda', label: 'Esse post ficou uma merda' },
+  { key: 'pobre', label: 'Você é pobre premium' },
+  { key: 'sad', label: 'Sad' },
+]
+
+// Gera contagens iniciais determinísticas (sem Math.random) a partir do id
+// do comentário, só para o mock parecer vivo.
+function seedReactionCounts(commentId) {
+  let seed = 0
+  for (let i = 0; i < commentId.length; i++) seed += commentId.charCodeAt(i) * (i + 1)
+  const counts = {}
+  REACTIONS.forEach((r, i) => {
+    const v = (seed * (i + 3)) % 11
+    if (v > 6) counts[r.key] = v - 6
+  })
+  return counts
+}
+export const COMMENT_REACTIONS = Object.fromEntries(
+  Array.from({ length: 60 }, (_, i) => `c${i + 1}`).map((id) => [id, seedReactionCounts(id)]),
+)
 
 // ── Comentários (árvore via parentId) ──────────────────────────────────────
 export const COMMENTS = [
@@ -613,7 +940,7 @@ export const COMMENTS = [
 export const NOTIFICATIONS = [
   { id: 'n1', type: 'live', text: 'A live "Análise ao vivo: cenário de juros e impacto nos FIIs" está acontecendo agora. Você é elegível!', createdAt: hoursAgo(0.4), read: false, link: '/' },
   { id: 'n2', type: 'reply', text: 'ricardo.fiis respondeu ao seu tópico "Dúvida sobre rebalanceamento com o PIAR".', createdAt: daysAgo(5.5), read: true, link: '/post/p10' },
-  { id: 'n3', type: 'like', text: 'Seu case "Como montei minha reserva de emergência" recebeu 25 novos votos.', createdAt: daysAgo(0.5), read: false, link: '/post/p3' },
+  { id: 'n3', type: 'voto', text: 'Seu case "Como montei minha reserva de emergência" recebeu 25 novos votos.', createdAt: daysAgo(0.5), read: false, link: '/post/p3' },
   { id: 'n4', type: 'follow', text: 'analu.invest está te seguindo.', createdAt: daysAgo(1), read: false, link: '/perfil/u9' },
   { id: 'n5', type: 'badge', text: 'Você desbloqueou a badge "Navegante da Turma 42".', createdAt: daysAgo(2), read: true, link: '/perfil/u1' },
   { id: 'n6', type: 'reply', text: 'joao.rf comentou no tópico que você segue: "Como declarar FIIs no imposto de renda...".', createdAt: hoursAgo(4), read: false, link: '/post/p1' },
@@ -655,6 +982,17 @@ export const CONVERSATIONS = [
     box: 'solicitacoes', // não são amigos → cai em solicitações
     messages: [
       { id: 'm6', fromId: 'u8', text: 'Oi! Tenho uma oportunidade imperdível pra te mostrar, posso enviar o link?', createdAt: hoursAgo(3) },
+    ],
+  },
+  {
+    id: 'dm4',
+    withId: 'suporte',
+    box: 'suporte', // aba exclusiva de suporte — sempre disponível, sem trava de amizade
+    messages: [
+      { id: 'm7', fromId: 'u1', text: 'Oi! O certificado do módulo 6 não aparece na minha área de aluno, alguém pode verificar?', createdAt: daysAgo(2) },
+      { id: 'm8', fromId: 'suporte', text: 'Olá, Marina! Vamos verificar por aqui. Pode confirmar o e-mail cadastrado na sua conta?', createdAt: daysAgo(2) },
+      { id: 'm9', fromId: 'u1', text: 'Claro, é o mesmo do cadastro da Escola AUVP.', createdAt: daysAgo(1.9) },
+      { id: 'm10', fromId: 'suporte', text: 'Encontramos a pendência e já liberamos o certificado. Pode conferir novamente na sua área — qualquer coisa, seguimos por aqui!', createdAt: daysAgo(1.8) },
     ],
   },
 ]
@@ -826,12 +1164,100 @@ export const MOD_METRICS = {
 // ── Moderação: central de conselheiros ─────────────────────────────────────
 export const UNANSWERED_QUEUE = [
   { id: 'q1', postId: 'p4', hoursOpen: 48, topic: 'Tesouro IPCA+ ou prefixado para objetivo de 10 anos?', tags: ['tesouro-direto', 'renda-fixa'] },
-  { id: 'q2', postId: 'p9', hoursOpen: 14, topic: 'Vale a pena manter previdência PGBL do banco antigo?', tags: ['previdencia', 'imposto-de-renda'] },
+  { id: 'q2', postId: 'p9', hoursOpen: 14, topic: 'Vale a pena manter previdência PGBL do banco antigo?', tags: ['previdencia-privada', 'imposto-de-renda'] },
 ]
 
 export const COUNSELOR_PERFORMANCE = [
   { userId: 'u2', validatedAnswers: 112, avgRating: 4.9, specialty: 'FIIs' },
   { userId: 'u3', validatedAnswers: 87, avgRating: 4.8, specialty: 'Imposto de Renda' },
+]
+
+// ── Programa de Conselheiros (conversas 1:1 agendadas) ──────────────────────
+// Conecta alunos a membros experientes da própria comunidade (clientes e
+// alunos voluntários) para conversas orientativas rápidas, objetivas e
+// humanas antes de uma decisão importante. Distinto da validação técnica
+// de respostas do fórum (COUNSELOR_PERFORMANCE, acima).
+export const ADVISOR_AREAS = {
+  carreira: 'Carreira',
+  dinheiro: 'Dinheiro',
+  relacionamentos: 'Relacionamentos',
+  saude: 'Saúde',
+  empreendedorismo: 'Empreendedorismo',
+  'decisoes-dificeis': 'Decisões difíceis',
+  'transicao-de-vida': 'Momentos de transição',
+}
+
+export const CONSELHEIRO_PROGRAM = [
+  {
+    userId: 'u10',
+    areas: ['carreira', 'decisoes-dificeis', 'transicao-de-vida'],
+    availability: [
+      { id: 'slot1', label: 'Amanhã, 09:00', at: hoursAgo(-20) },
+      { id: 'slot2', label: 'Amanhã, 14:30', at: hoursAgo(-25.5) },
+      { id: 'slot3', label: 'Quinta, 18:00', at: hoursAgo(-68) },
+    ],
+  },
+  {
+    userId: 'u11',
+    areas: ['empreendedorismo', 'decisoes-dificeis', 'carreira'],
+    availability: [
+      { id: 'slot4', label: 'Hoje, 19:00', at: hoursAgo(-6) },
+      { id: 'slot5', label: 'Sexta, 12:00', at: hoursAgo(-90) },
+    ],
+  },
+  {
+    userId: 'u12',
+    areas: ['relacionamentos', 'dinheiro', 'transicao-de-vida'],
+    availability: [
+      { id: 'slot6', label: 'Amanhã, 20:00', at: hoursAgo(-30) },
+      { id: 'slot7', label: 'Sábado, 10:00', at: hoursAgo(-110) },
+    ],
+  },
+]
+
+// Elegibilidade: AUVP Sempre ativo OU dentro das primeiras 8 semanas (56
+// dias) de Escola AUVP. Fora disso, o agendamento redireciona para a
+// página do AUVP Sempre.
+export function isEligibleForConselheiros(user) {
+  if (!user) return false
+  if (user.auvpSempreAtivo) return true
+  if (!user.escolaStartedAt) return false
+  const weeksSinceStart = (Date.now() - new Date(user.escolaStartedAt).getTime()) / (7 * 86400e3)
+  return weeksSinceStart <= 8
+}
+
+export const CONSELHEIRO_BOOKINGS = [
+  {
+    id: 'bk1',
+    conselheiroId: 'u2', // ilustra reagendamento fora do fluxo principal (não usado na UI)
+    status: 'cancelado',
+    at: daysAgo(20),
+    meetLink: null,
+  },
+  {
+    id: 'bk2',
+    conselheiroId: 'u11',
+    status: 'concluido',
+    at: daysAgo(9),
+    meetLink: 'https://meet.google.com/xyz-mock-9021',
+    csat: { rating: 5, comment: 'Conversa direta e sem rodeios, exatamente o que eu precisava antes de pedir demissão.' },
+  },
+  {
+    id: 'bk3',
+    conselheiroId: 'u10',
+    status: 'concluido',
+    at: daysAgo(3),
+    meetLink: 'https://meet.google.com/xyz-mock-4487',
+    csat: null, // aguardando avaliação CSAT
+  },
+  {
+    id: 'bk4',
+    conselheiroId: 'u12',
+    status: 'agendado',
+    at: hoursAgo(-30),
+    meetLink: 'https://meet.google.com/xyz-mock-7734',
+    csat: null,
+  },
 ]
 
 // ── Retrospectiva semanal ──────────────────────────────────────────────────

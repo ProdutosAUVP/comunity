@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, ListBullets, Sparkle, TextB, TextItalic, X } from '@phosphor-icons/react'
 import { useApp } from '../context/AppContext'
-import { Button, Card, Eyebrow, FlairBadge, TagPill } from '../components/ui'
-import { ALL_TAGS, FLAIRS, suggestTags } from '../data/mock'
+import { AreaPill, Button, Card, Eyebrow, FlairBadge, TagPill } from '../components/ui'
+import { ALL_TAGS, AREAS, FLAIRS, suggestArea, suggestTags } from '../data/mock'
 
 export default function CreatePostPage() {
   const { createPost, currentUser } = useApp()
@@ -11,6 +11,8 @@ export default function CreatePostPage() {
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [flair, setFlair] = useState('Dúvida')
+  const [area, setArea] = useState(null)
+  const [areaTouched, setAreaTouched] = useState(false)
   const [tags, setTags] = useState([])
   const [tagInput, setTagInput] = useState('')
   const [publishing, setPublishing] = useState(false)
@@ -20,6 +22,13 @@ export default function CreatePostPage() {
     () => suggestTags(`${title} ${body}`).filter((t) => !tags.includes(t)),
     [title, body, tags],
   )
+
+  // Sugestão automática de área baseada no texto (simula IA) — só entra em
+  // ação enquanto o autor não escolher manualmente uma área.
+  const suggestedArea = useMemo(() => suggestArea(`${title} ${body}`), [title, body])
+  useEffect(() => {
+    if (!areaTouched && suggestedArea) setArea(suggestedArea)
+  }, [suggestedArea, areaTouched])
 
   const autocomplete = useMemo(() => {
     const q = tagInput.trim().toLowerCase()
@@ -43,10 +52,11 @@ export default function CreatePostPage() {
   const publish = (e) => {
     e.preventDefault()
     if (!title.trim() || !body.trim()) return
+    if (!area) return
     setPublishing(true)
     // Simula latência de rede para exibir o estado "loading" do botão
     setTimeout(() => {
-      const id = createPost({ title: title.trim(), body: body.trim(), flair, tags })
+      const id = createPost({ title: title.trim(), body: body.trim(), flair, area, tags })
       navigate(`/post/${id}`)
     }, 700)
   }
@@ -109,6 +119,35 @@ export default function CreatePostPage() {
                 className="w-full resize-y rounded-b-[5px] bg-background p-[15px] font-roboto text-[16px] leading-[1.6] text-foreground outline-none"
               />
             </div>
+          </div>
+
+          <div>
+            <p className="mb-[8px] font-sora text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
+              Área (obrigatório)
+            </p>
+            <div className="flex flex-wrap gap-[8px]" role="radiogroup" aria-label="Seleção de área">
+              {Object.entries(AREAS).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  role="radio"
+                  aria-checked={area === key}
+                  onClick={() => {
+                    setArea(key)
+                    setAreaTouched(true)
+                  }}
+                  className="rounded-[5px]"
+                >
+                  <AreaPill label={label} active={area === key} />
+                </button>
+              ))}
+            </div>
+            {!areaTouched && suggestedArea && (
+              <p className="mt-[8px] flex items-center gap-[6px] font-roboto text-[12px] text-muted-foreground">
+                <Sparkle size={13} weight="fill" className="text-primary" /> Área sugerida automaticamente pelo texto — pode
+                trocar quando quiser.
+              </p>
+            )}
           </div>
 
           <div>
@@ -179,7 +218,7 @@ export default function CreatePostPage() {
             <Button type="button" variant="ghost" size="sm" onClick={() => navigate('/')}>
               Cancelar
             </Button>
-            <Button type="submit" size="sm" disabled={!title.trim() || !body.trim() || publishing}>
+            <Button type="submit" size="sm" disabled={!title.trim() || !body.trim() || !area || publishing}>
               {publishing ? (
                 <>
                   <span className="h-[16px] w-[16px] animate-spin rounded-full border-2 border-primary-foreground/40 border-t-primary-foreground" aria-hidden />

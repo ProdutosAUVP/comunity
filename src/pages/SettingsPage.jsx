@@ -30,7 +30,7 @@ function Toggle({ checked, onChange, label, description }) {
 
 const NOTIF_CATEGORIES = [
   { key: 'respostas', label: 'Respostas e comentários', desc: 'Interações nos tópicos que você criou ou segue' },
-  { key: 'curtidas', label: 'Votos e curtidas', desc: 'Quando suas publicações recebem votos' },
+  { key: 'votos', label: 'Votos', desc: 'Quando suas publicações recebem votos' },
   { key: 'seguidores', label: 'Novos seguidores', desc: 'Quando alguém começa a te seguir' },
   { key: 'lives', label: 'Lives e eventos', desc: 'Avisos de lives elegíveis para a sua turma' },
   { key: 'moderacao', label: 'Moderação', desc: 'Avisos oficiais e resultados de solicitações' },
@@ -38,7 +38,7 @@ const NOTIF_CATEGORIES = [
 ]
 
 export default function SettingsPage() {
-  const { currentUser, settings, updateSettings, requestNicknameChange } = useApp()
+  const { currentUser, settings, updateSettings, requestNicknameChange, toggleAuvpSempre } = useApp()
   const { theme, setTheme } = useTheme()
   const [nickname, setNickname] = useState('')
   const history = NICKNAME_HISTORY[currentUser.id] || []
@@ -165,6 +165,19 @@ export default function SettingsPage() {
               </button>
             ))}
           </div>
+        </div>
+      </Card>
+
+      {/* AUVP Sempre — elegibilidade do Programa de Conselheiros */}
+      <Card>
+        <Eyebrow>AUVP Sempre</Eyebrow>
+        <div className="mt-[10px] divide-y divide-border">
+          <Toggle
+            checked={!!currentUser.auvpSempreAtivo}
+            onChange={toggleAuvpSempre}
+            label="AUVP Sempre ativo (simulação)"
+            description="Controla a elegibilidade ao Programa de Conselheiros — alunos nas primeiras 8 semanas de Escola AUVP também têm acesso"
+          />
         </div>
       </Card>
 
