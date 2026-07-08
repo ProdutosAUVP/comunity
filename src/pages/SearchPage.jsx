@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { MagnifyingGlass } from '@phosphor-icons/react'
 import { useApp } from '../context/AppContext'
 import PostCard from '../components/PostCard'
@@ -15,8 +15,12 @@ const DATE_FILTERS = [
 
 export default function SearchPage() {
   const { posts, users } = useApp()
-  const [query, setQuery] = useState('')
-  const [area, setArea] = useState(null)
+  const location = useLocation()
+  // A busca reduzida do cabeçalho passa o termo digitado via router state
+  // (link "Ver todos os resultados"), para não perder o que o aluno já tinha buscado.
+  const [query, setQuery] = useState(location.state?.initialQuery || '')
+  // O grid de categorias (aba "Tópicos" do Hub) abre a área já filtrada aqui.
+  const [area, setArea] = useState(location.state?.initialArea || null)
   const [tags, setTags] = useState([])
   const [turma, setTurma] = useState(null)
   const [flair, setFlair] = useState(null)

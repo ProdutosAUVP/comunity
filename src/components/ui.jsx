@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { SealCheck, ShieldStar, X } from '@phosphor-icons/react'
 import { useApp } from '../context/AppContext'
 
@@ -215,11 +216,24 @@ export function Modal({ open, onClose, title, children, wide = false }) {
     if (!open) return
     const onKey = (e) => e.key === 'Escape' && onClose()
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    // Trava o scroll e o hover/clique do restante da página enquanto o
+    // modal está aberto — sem isso, um modal renderizado dentro de um
+    // ancestral com hover:transform (ex.: o card de post) ficava preso ao
+    // contexto de empilhamento do ancestral, permitindo hover/clique
+    // vazarem para os elementos por trás.
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prevOverflow
+    }
   }, [open, onClose])
   if (!open) return null
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-[15px]" role="dialog" aria-modal="true" aria-label={title}>
+  // Portal para document.body: garante que o modal nunca fique preso no
+  // contexto de empilhamento de um ancestral (ex.: cards com hover:transform),
+  // o que já causou vazamento de hover/clique para elementos atrás dele.
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-[15px]" role="dialog" aria-modal="true" aria-label={title}>
       <div className="absolute inset-0 bg-black/70" onClick={onClose} />
       <div
         className={`relative w-full ${wide ? 'max-w-[760px]' : 'max-w-[520px]'} max-h-[88vh] overflow-y-auto scrollbar-thin rounded-[12px] border border-border bg-card text-card-foreground p-[20px] md:p-[30px]`}
@@ -236,7 +250,8 @@ export function Modal({ open, onClose, title, children, wide = false }) {
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import {
   Bell,
   ChatsCircle,
@@ -21,9 +21,10 @@ import { useApp } from '../context/AppContext'
 import { useTheme } from '../context/ThemeContext'
 import { Avatar, ToastStack } from './ui'
 import AuvpEscolaLogo from './AuvpEscolaLogo'
+import HeaderSearch from './HeaderSearch'
 
 const NAV = [
-  { to: '/', label: 'Hub da Comunidade', icon: House, end: true },
+  { to: '/', label: 'Início', icon: House, end: true },
   { to: '/busca', label: 'Busca Avançada', icon: MagnifyingGlass },
   { to: '/conselheiros', label: 'Conselheiros', icon: Compass },
   { to: '/conexoes', label: 'Conexões', icon: UsersThree },
@@ -48,7 +49,6 @@ function ThemeToggle() {
 
 export default function Layout({ children }) {
   const { currentUser, notifications, conversations, moderationMode, toggleModerationMode } = useApp()
-  const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const unread = notifications.filter((n) => !n.read).length
   const pendingDms = conversations.filter((c) => c.box === 'solicitacoes').length
@@ -60,42 +60,60 @@ export default function Layout({ children }) {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Logo no mobile: barra própria, fixa (nunca acompanha a rolagem),
-          acima dos botões e da busca. No desktop a logo volta para dentro
-          da barra principal, mantendo a visualidade em uma única linha. */}
-      <div className="fixed inset-x-0 top-0 z-50 flex h-[84px] items-center justify-center border-b border-border/60 bg-background/70 backdrop-blur-md lg:hidden">
-        <Link to="/" aria-label="Comunidade AUVP — início">
-          <AuvpEscolaLogo className="h-[72px] w-auto text-foreground" />
-        </Link>
-      </div>
-      <div className="h-[84px] lg:hidden" aria-hidden />
-
-      {/* Barra superior — efeito glass sutil (fundo translúcido + blur) */}
-      <header className="sticky top-[84px] lg:top-[40px] z-40 border-b border-border/60 bg-background/70 backdrop-blur-md">
-        <div className="mx-auto flex h-[64px] max-w-[1200px] items-center gap-[15px] px-6 lg:h-[84px]">
-          {/* Menu hamburguer (mobile) — a navegação inferior não é usada aqui
-              porque a Comunidade roda embutida no SuperApp, que já tem sua
-              própria barra de navegação inferior. */}
+      {/* Cabeçalho mobile: um único bloco fixo (logo + ações), para nunca
+          ser afetado pela rolagem — evita o desalinhamento que acontecia ao
+          coordenar uma barra fixa com uma barra "sticky" logo abaixo dela. */}
+      <div className="fixed inset-x-0 top-0 z-50 lg:hidden">
+        <div className="flex h-[84px] items-center justify-center border-b border-border/60 bg-background/70 backdrop-blur-md">
+          <Link to="/" aria-label="Comunidade AUVP — início">
+            <AuvpEscolaLogo className="h-[72px] w-auto text-foreground" />
+          </Link>
+        </div>
+        <div className="flex h-[64px] items-center gap-[10px] border-b border-border/60 bg-background/70 backdrop-blur-md px-4">
+          {/* Menu hamburguer — a navegação inferior não é usada aqui porque a
+              Comunidade roda embutida no SuperApp, que já tem sua própria
+              barra de navegação inferior. */}
           <button
             onClick={() => setDrawerOpen(true)}
             aria-label="Abrir menu de navegação"
-            className="rounded-[5px] p-[8px] text-foreground lg:hidden"
+            className="shrink-0 rounded-[5px] p-[8px] text-foreground"
           >
             <List size={22} weight="bold" />
           </button>
 
-          <Link to="/" className="hidden lg:block" aria-label="Comunidade AUVP — início">
+          <HeaderSearch className="min-w-0 flex-1" />
+
+          <ThemeToggle />
+
+          <Link
+            to="/notificacoes"
+            className="relative shrink-0 rounded-[5px] p-[8px] text-foreground transition-all duration-240 hover:bg-muted"
+            aria-label={`Notificações${unread ? `, ${unread} não lidas` : ''}`}
+          >
+            <Bell size={20} weight="bold" />
+            {unread > 0 && (
+              <span className="absolute -right-[2px] -top-[2px] flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-destructive px-[4px] font-sora text-[10px] font-bold text-destructive-foreground">
+                {unread}
+              </span>
+            )}
+          </Link>
+
+          <Link to={`/perfil/${currentUser.id}`} aria-label="Meu perfil" className="shrink-0">
+            <Avatar user={currentUser} size={36} showRole={false} />
+          </Link>
+        </div>
+      </div>
+      <div className="h-[148px] lg:hidden" aria-hidden />
+
+      {/* Cabeçalho desktop — única linha, glass sutil, abaixo da barra
+          global do SuperApp. */}
+      <header className="sticky top-[40px] z-40 hidden border-b border-border/60 bg-background/70 backdrop-blur-md lg:block">
+        <div className="mx-auto flex h-[84px] max-w-[1200px] items-center gap-[15px] px-6">
+          <Link to="/" aria-label="Comunidade AUVP — início">
             <AuvpEscolaLogo className="h-[72px] w-auto text-foreground" />
           </Link>
 
-          <button
-            onClick={() => navigate('/busca')}
-            className="ml-auto flex items-center gap-[8px] rounded-[5px] border border-border p-[9px] text-left font-roboto text-[14px] text-muted-foreground transition-all duration-240 hover:border-primary md:min-w-0 md:flex-1 md:max-w-[420px] md:px-[15px]"
-            aria-label="Abrir busca avançada"
-          >
-            <MagnifyingGlass size={16} weight="bold" />
-            <span className="hidden truncate md:inline">Buscar posts, usuários, tags, turmas…</span>
-          </button>
+          <HeaderSearch className="ml-auto min-w-0 max-w-[420px] flex-1" />
 
           <ThemeToggle />
 
@@ -114,7 +132,7 @@ export default function Layout({ children }) {
 
           <Link
             to="/moderacao"
-            className="hidden md:flex items-center gap-[6px] rounded-[5px] border border-border px-[12px] py-[8px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-foreground transition-all duration-240 hover:border-primary hover:text-primary"
+            className="flex items-center gap-[6px] rounded-[5px] border border-border px-[12px] py-[8px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-foreground transition-all duration-240 hover:border-primary hover:text-primary"
           >
             <ShieldStar size={15} weight="bold" /> Moderação
           </Link>

@@ -21,7 +21,7 @@ const BENTO_GIFS = [gifChart, gifCoin, gifConfetti, gifWave, gifPulse, gifSparkl
 // ocupando 100% da largura (evita buracos de grid em telas estreitas).
 const BENTO_HEIGHTS = ['h-[220px]', 'h-[150px]', 'h-[180px]', 'h-[150px]', 'h-[200px]', 'h-[160px]']
 
-// Tópicos em alta no topo do Hub, em formato de bentobox (grid assimétrico
+// Posts em alta no topo do Hub, em formato de bentobox (grid assimétrico
 // com GIFs animados). Ao tocar um tile, abre o mesmo visualizador em tela
 // cheia estilo stories. Ponto de destaque (verde) = ainda não visto.
 export default function TopicStories() {
@@ -30,7 +30,7 @@ export default function TopicStories() {
   const [seen, setSeen] = useState(() => new Set())
   const [viewerIndex, setViewerIndex] = useState(null)
 
-  // Tópicos em alta: mais votados das últimas publicações visíveis
+  // Posts em alta: mais votados das últimas publicações visíveis
   const stories = useMemo(
     () =>
       posts
@@ -82,7 +82,7 @@ export default function TopicStories() {
   return (
     <>
       {/* Mobile: lista compacta (sem GIF de fundo, só uma miniatura) */}
-      <div className="flex flex-col gap-[8px] sm:hidden" role="list" aria-label="Tópicos em alta">
+      <div className="flex flex-col gap-[8px] sm:hidden" role="list" aria-label="Posts em alta">
         {stories.map((post, i) => {
           const author = users[post.authorId]
           const wasSeen = seen.has(post.id)
@@ -92,7 +92,7 @@ export default function TopicStories() {
               key={post.id}
               role="listitem"
               onClick={() => openStory(i)}
-              aria-label={`Ver tópico em destaque: ${post.title}`}
+              aria-label={`Ver post em destaque: ${post.title}`}
               className="flex items-center gap-[10px] rounded-[10px] border border-border bg-card p-[8px] text-left transition-all duration-240 active:scale-[0.99]"
             >
               <span className="relative shrink-0 overflow-hidden rounded-[8px]">
@@ -115,7 +115,7 @@ export default function TopicStories() {
 
       {/* Tablet/desktop: bentobox de visual arrojado com GIFs, tiles sempre
           em largura total (evita buracos de grid em telas mais estreitas) */}
-      <div className="hidden flex-col gap-[10px] sm:flex" role="list" aria-label="Tópicos em alta">
+      <div className="hidden flex-col gap-[10px] sm:flex" role="list" aria-label="Posts em alta">
         {stories.map((post, i) => {
           const author = users[post.authorId]
           const wasSeen = seen.has(post.id)
@@ -126,7 +126,7 @@ export default function TopicStories() {
               key={post.id}
               role="listitem"
               onClick={() => openStory(i)}
-              aria-label={`Ver tópico em destaque: ${post.title}`}
+              aria-label={`Ver post em destaque: ${post.title}`}
               className={`group relative w-full overflow-hidden rounded-[14px] text-left transition-all duration-240 hover:-translate-y-[2px] ${height}`}
             >
               <img src={gif} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover transition-transform duration-240 group-hover:scale-[1.06]" />
@@ -199,7 +199,7 @@ export default function TopicStories() {
               </div>
               <div className="relative z-20 mt-[45px]">
                 <Button variant="primary" size="sm" onClick={() => navigate(`/post/${active.id}`)}>
-                  Abrir tópico completo
+                  Abrir post completo
                 </Button>
               </div>
             </div>
