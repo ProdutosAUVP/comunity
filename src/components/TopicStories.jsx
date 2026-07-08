@@ -3,19 +3,27 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowFatUp, CaretLeft, CaretRight, ChatCircle, X } from '@phosphor-icons/react'
 import { useApp } from '../context/AppContext'
 import { timeAgo } from '../data/mock'
-import { Avatar, Button, FLAIR_TOKENS, FlairBadge, TurmaTag } from './ui'
+import { Avatar, Button, FlairBadge, TurmaTag } from './ui'
+import { stripMarkdown } from './RichText'
+import gifChart from '../assets/bento/chart.gif'
+import gifCoin from '../assets/bento/coin.gif'
+import gifConfetti from '../assets/bento/confetti.gif'
+import gifWave from '../assets/bento/wave.gif'
+import gifPulse from '../assets/bento/pulse.gif'
+import gifSparkle from '../assets/bento/sparkle.gif'
 
-const RING_CLASS = {
-  info: 'ring-info',
-  primary: 'ring-primary',
-  destructive: 'ring-destructive',
-  success: 'ring-success',
-  warning: 'ring-warning',
-  neutral: 'ring-border',
-}
+// GIFs de memes gerados localmente (sem dependência externa, sem reusar
+// templates de terceiros) para dar um visual arrojado e engraçado aos tiles
+// do bentobox — cada tópico em alta recebe um looping cômico diferente.
+const BENTO_GIFS = [gifChart, gifCoin, gifConfetti, gifWave, gifPulse, gifSparkle]
 
-// Tópicos da comunidade em formato de stories (bolinhas no topo do Hub,
-// como no Instagram). Anel colorido = ainda não visto; cinza = já visto.
+// Alterna a altura de cada tile para dar ritmo de "bentobox" mesmo com todos
+// ocupando 100% da largura (evita buracos de grid em telas estreitas).
+const BENTO_HEIGHTS = ['h-[220px]', 'h-[150px]', 'h-[180px]', 'h-[150px]', 'h-[200px]', 'h-[160px]']
+
+// Tópicos em alta no topo do Hub, em formato de bentobox (grid assimétrico
+// com GIFs animados). Ao tocar um tile, abre o mesmo visualizador em tela
+// cheia estilo stories. Ponto de destaque (verde) = ainda não visto.
 export default function TopicStories() {
   const { posts, users, comments } = useApp()
   const navigate = useNavigate()
@@ -73,43 +81,76 @@ export default function TopicStories() {
 
   return (
     <>
-      {/* Bolinhas no topo */}
-      <div className="overflow-x-auto scrollbar-thin" role="list" aria-label="Tópicos em alta">
-        <div className="flex gap-[15px] pt-[8px] pb-[8px]">
-          {stories.map((post, i) => {
-            const author = users[post.authorId]
-            const token = FLAIR_TOKENS[post.flair] || 'primary'
-            const wasSeen = seen.has(post.id)
-            return (
-              <button
-                key={post.id}
-                role="listitem"
-                onClick={() => openStory(i)}
-                className="flex w-[76px] shrink-0 flex-col items-center gap-[6px] text-center"
-                aria-label={`Story do tópico: ${post.title}`}
-              >
-                <span
-                  className={`flex h-[66px] w-[66px] items-center justify-center rounded-full ring-2 ring-offset-2 ring-offset-background p-[3px] transition-all duration-240 hover:scale-[1.05] ${
-                    wasSeen ? 'ring-border' : RING_CLASS[token]
-                  }`}
-                >
-                  <span className="flex h-full w-full items-center justify-center rounded-full border-[3px] border-background bg-muted font-anek text-[18px] font-semibold text-foreground">
-                    {author.initials}
+      {/* Mobile: lista compacta (sem GIF de fundo, só uma miniatura) */}
+      <div className="flex flex-col gap-[8px] sm:hidden" role="list" aria-label="Tópicos em alta">
+        {stories.map((post, i) => {
+          const author = users[post.authorId]
+          const wasSeen = seen.has(post.id)
+          const gif = BENTO_GIFS[i % BENTO_GIFS.length]
+          return (
+            <button
+              key={post.id}
+              role="listitem"
+              onClick={() => openStory(i)}
+              aria-label={`Ver tópico em destaque: ${post.title}`}
+              className="flex items-center gap-[10px] rounded-[10px] border border-border bg-card p-[8px] text-left transition-all duration-240 active:scale-[0.99]"
+            >
+              <span className="relative shrink-0 overflow-hidden rounded-[8px]">
+                <img src={gif} alt="" aria-hidden className="h-[48px] w-[48px] object-cover" />
+                {!wasSeen && <span className="absolute right-[3px] top-[3px] h-[7px] w-[7px] rounded-full bg-accent ring-2 ring-black/30" aria-hidden />}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-anek text-[14px] font-semibold leading-tight text-foreground line-clamp-1">{post.title}</p>
+                <p className="mt-[2px] flex items-center gap-[8px] font-roboto text-[11px] text-muted-foreground">
+                  <span>{author.nickname}</span>
+                  <span className="flex items-center gap-[2px]">
+                    <ArrowFatUp size={11} weight="bold" /> {post.upvotes}
                   </span>
-                </span>
-                <span className={`w-full truncate font-roboto text-[11px] leading-tight ${wasSeen ? 'text-muted-foreground' : 'text-foreground font-medium'}`}>
-                  {post.title}
-                </span>
-              </button>
-            )
-          })}
-        </div>
+                </p>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Tablet/desktop: bentobox de visual arrojado com GIFs, tiles sempre
+          em largura total (evita buracos de grid em telas mais estreitas) */}
+      <div className="hidden flex-col gap-[10px] sm:flex" role="list" aria-label="Tópicos em alta">
+        {stories.map((post, i) => {
+          const author = users[post.authorId]
+          const wasSeen = seen.has(post.id)
+          const gif = BENTO_GIFS[i % BENTO_GIFS.length]
+          const height = BENTO_HEIGHTS[i % BENTO_HEIGHTS.length]
+          return (
+            <button
+              key={post.id}
+              role="listitem"
+              onClick={() => openStory(i)}
+              aria-label={`Ver tópico em destaque: ${post.title}`}
+              className={`group relative w-full overflow-hidden rounded-[14px] text-left transition-all duration-240 hover:-translate-y-[2px] ${height}`}
+            >
+              <img src={gif} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover transition-transform duration-240 group-hover:scale-[1.06]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
+              {!wasSeen && <span className="absolute right-[15px] top-[15px] h-[9px] w-[9px] rounded-full bg-accent ring-2 ring-black/40" aria-hidden />}
+              <div className="absolute left-[15px] top-[15px] flex items-center gap-[6px]">
+                <Avatar user={author} size={26} showRole={false} />
+                <span className="font-roboto text-[12px] font-medium text-white/90">{author.nickname}</span>
+              </div>
+              <div className="absolute inset-x-0 bottom-0 p-[15px]">
+                <p className="font-anek text-[18px] font-semibold leading-tight text-white line-clamp-2 md:text-[22px]">{post.title}</p>
+                <p className="mt-[6px] flex items-center gap-[4px] font-roboto text-[12px] text-white/70">
+                  <ArrowFatUp size={13} weight="bold" /> {post.upvotes}
+                </p>
+              </div>
+            </button>
+          )
+        })}
       </div>
 
       {/* Visualizador em tela cheia estilo Instagram — seção de impacto,
           sempre em fundo escuro independente do tema do app. */}
       {active && (
-        <div className="dark fixed inset-0 z-50 flex flex-col bg-background" role="dialog" aria-modal="true" aria-label={`Story: ${active.title}`}>
+        <div className="dark fixed inset-0 z-[90] flex flex-col bg-background" role="dialog" aria-modal="true" aria-label={`Story: ${active.title}`}>
           {/* Barras de progresso */}
           <div className="flex gap-[5px] p-[15px]">
             {stories.map((s, i) => (
@@ -147,7 +188,7 @@ export default function TopicStories() {
               <h2 className="mt-[15px] font-anek text-[28px] md:text-[41px] font-semibold leading-[1.15] text-foreground">
                 {active.title}
               </h2>
-              <p className="mt-[15px] font-roboto text-[16px] leading-[1.6] text-muted-foreground line-clamp-4">{active.body}</p>
+              <p className="mt-[15px] font-roboto text-[16px] leading-[1.6] text-muted-foreground line-clamp-4">{stripMarkdown(active.body)}</p>
               <div className="mt-[20px] flex items-center justify-center gap-[20px] font-roboto text-[14px] text-muted-foreground">
                 <span className="flex items-center gap-[6px]">
                   <ArrowFatUp size={16} weight="bold" className="text-accent" /> {active.upvotes} votos

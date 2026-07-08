@@ -92,18 +92,25 @@ export function UpcomingLiveCard() {
   if (!live) return null
   return (
     <Card className="!p-[20px]">
-      <div className="flex flex-wrap items-center gap-[15px]">
-        <span className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-[5px] bg-primary text-primary-foreground">
-          <CalendarBlank size={20} weight="bold" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="font-sora text-[11px] font-bold uppercase tracking-[0.15em] text-primary">Live elegível para sua turma</p>
-          <p className="mt-[2px] font-anek text-[18px] font-semibold leading-tight text-foreground">{live.title}</p>
-          <p className="mt-[2px] font-roboto text-[13px] text-muted-foreground">
-            {formatDateTime(live.startsAt)} · com {live.host}
-          </p>
+      <div className="flex flex-col gap-[15px] sm:flex-row sm:items-center">
+        <div className="flex items-start gap-[15px]">
+          <span className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-[5px] bg-primary text-primary-foreground">
+            <CalendarBlank size={20} weight="bold" />
+          </span>
+          <div className="min-w-0">
+            <p className="font-sora text-[11px] font-bold uppercase tracking-[0.15em] text-primary">Live elegível para sua turma</p>
+            <p className="mt-[2px] font-anek text-[18px] font-semibold leading-tight text-foreground">{live.title}</p>
+            <p className="mt-[2px] font-roboto text-[13px] text-muted-foreground">
+              {formatDateTime(live.startsAt)} · com {live.host}
+            </p>
+          </div>
         </div>
-        <Button size="xs" variant="outline" onClick={() => toast('Lembrete criado! Você será notificado quando a live começar.')}>
+        <Button
+          size="xs"
+          variant="outline"
+          className="self-start sm:ml-auto sm:shrink-0 sm:self-center"
+          onClick={() => toast('Lembrete criado! Você será notificado quando a live começar.')}
+        >
           Ativar lembrete
         </Button>
       </div>

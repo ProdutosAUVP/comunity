@@ -62,22 +62,26 @@ export default function ConnectionsPage() {
           {friendRequests.map((req) => {
             const u = users[req.fromId]
             return (
-              <div key={req.id} className="flex flex-wrap items-center gap-[10px] rounded-[12px] bg-muted p-[15px]">
-                <Avatar user={u} size={40} />
-                <div className="min-w-0 flex-1">
-                  <Link to={`/perfil/${u.id}`} className="font-roboto text-[15px] font-medium text-foreground hover:underline">
-                    {u.nickname}
-                  </Link>
-                  <p className="font-roboto text-[12px] text-muted-foreground">
-                    {u.turma} · começou a te seguir {timeAgo(req.createdAt)}
-                  </p>
+              <div key={req.id} className="flex flex-col gap-[10px] rounded-[12px] bg-muted p-[15px] sm:flex-row sm:items-center">
+                <div className="flex items-center gap-[10px]">
+                  <Avatar user={u} size={40} />
+                  <div className="min-w-0">
+                    <Link to={`/perfil/${u.id}`} className="font-roboto text-[15px] font-medium text-foreground hover:underline">
+                      {u.nickname}
+                    </Link>
+                    <p className="font-roboto text-[12px] text-muted-foreground">
+                      {u.turma} · começou a te seguir {timeAgo(req.createdAt)}
+                    </p>
+                  </div>
                 </div>
-                <Button size="xs" onClick={() => acceptFriendRequest(req.id)}>
-                  <Check size={13} weight="bold" /> Seguir de volta
-                </Button>
-                <Button size="xs" variant="ghost" onClick={() => declineFriendRequest(req.id)} aria-label={`Dispensar solicitação de ${u.nickname}`}>
-                  <X size={13} weight="bold" />
-                </Button>
+                <div className="flex items-center gap-[10px] sm:ml-auto sm:shrink-0">
+                  <Button size="xs" onClick={() => acceptFriendRequest(req.id)}>
+                    <Check size={13} weight="bold" /> Seguir de volta
+                  </Button>
+                  <Button size="xs" variant="ghost" onClick={() => declineFriendRequest(req.id)} aria-label={`Dispensar solicitação de ${u.nickname}`}>
+                    <X size={13} weight="bold" />
+                  </Button>
+                </div>
               </div>
             )
           })}
@@ -116,15 +120,17 @@ export default function ConnectionsPage() {
         <Eyebrow>Você segue ({followingOnly.length})</Eyebrow>
         <div className="mt-[15px] grid gap-[15px] sm:grid-cols-2">
           {followingOnly.map((u) => (
-            <div key={u.id} className="flex items-center gap-[10px] rounded-[12px] border border-border p-[15px]">
-              <Avatar user={u} size={40} />
-              <div className="min-w-0 flex-1">
-                <Link to={`/perfil/${u.id}`} className="block truncate font-roboto text-[15px] font-medium text-foreground hover:underline">
-                  {u.nickname}
-                </Link>
-                <TurmaTag turma={u.turma} />
+            <div key={u.id} className="flex flex-col gap-[10px] rounded-[12px] border border-border p-[15px] min-[420px]:flex-row min-[420px]:items-center">
+              <div className="flex min-w-0 flex-1 items-center gap-[10px]">
+                <Avatar user={u} size={40} />
+                <div className="min-w-0">
+                  <Link to={`/perfil/${u.id}`} className="block truncate font-roboto text-[15px] font-medium text-foreground hover:underline">
+                    {u.nickname}
+                  </Link>
+                  <TurmaTag turma={u.turma} />
+                </div>
               </div>
-              <Button size="xs" variant="ghost" onClick={() => toggleFollow(u.id)}>
+              <Button size="xs" variant="ghost" className="self-start min-[420px]:shrink-0 min-[420px]:self-center" onClick={() => toggleFollow(u.id)}>
                 Deixar de seguir
               </Button>
             </div>

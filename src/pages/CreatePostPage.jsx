@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ListBullets, Sparkle, TextB, TextItalic, X } from '@phosphor-icons/react'
+import { ArrowLeft, Sparkle, X } from '@phosphor-icons/react'
 import { useApp } from '../context/AppContext'
 import { AreaPill, Button, Card, Eyebrow, FlairBadge, TagPill } from '../components/ui'
+import RichComposer from '../components/RichComposer'
 import { ALL_TAGS, AREAS, FLAIRS, suggestArea, suggestTags } from '../data/mock'
 
 export default function CreatePostPage() {
@@ -94,31 +95,17 @@ export default function CreatePostPage() {
           </div>
 
           <div>
-            <label htmlFor="post-body" className="mb-[8px] block font-sora text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
+            <label className="mb-[8px] block font-sora text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
               Detalhamento
             </label>
-            <div className="rounded-[5px] border border-border transition-all duration-240 focus-within:border-primary">
-              <div className="flex gap-[4px] border-b border-border p-[8px]" role="toolbar" aria-label="Formatação de texto">
-                {[TextB, TextItalic, ListBullets].map((Icon, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    aria-label={['Negrito', 'Itálico', 'Lista'][i]}
-                    className="rounded-[5px] p-[6px] text-muted-foreground transition-all duration-240 hover:bg-muted hover:text-primary"
-                  >
-                    <Icon size={16} weight="bold" />
-                  </button>
-                ))}
-              </div>
-              <textarea
-                id="post-body"
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                rows={7}
-                placeholder="Descreva o contexto, o que você já tentou e qual é exatamente a sua dúvida ou case…"
-                className="w-full resize-y rounded-b-[5px] bg-background p-[15px] font-roboto text-[16px] leading-[1.6] text-foreground outline-none"
-              />
-            </div>
+            <RichComposer
+              value={body}
+              onChange={setBody}
+              rows={7}
+              placeholder="Descreva o contexto, o que você já tentou e qual é exatamente a sua dúvida ou case…"
+              ariaLabel="Detalhamento do post"
+              textareaClassName="text-[16px]"
+            />
           </div>
 
           <div>

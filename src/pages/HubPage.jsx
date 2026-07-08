@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext'
 import PostCard from '../components/PostCard'
 import TopicStories from '../components/TopicStories'
 import { LiveNowBanner, UpcomingLiveCard } from '../components/Live'
-import { EmptyState, Eyebrow, Segmented } from '../components/ui'
+import { EmptyState, Segmented } from '../components/ui'
 
 const FEEDS = [
   { value: 'foryou', label: 'Para Você' },
@@ -11,8 +11,14 @@ const FEEDS = [
   { value: 'updates', label: 'Atualizações AUVP' },
 ]
 
+const HUB_TABS = [
+  { value: 'feed', label: 'Feed' },
+  { value: 'topicos', label: 'Tópicos' },
+]
+
 export default function HubPage() {
   const { posts, currentUser } = useApp()
+  const [view, setView] = useState('feed')
   const [feed, setFeed] = useState('foryou')
 
   const visiblePosts = useMemo(() => {
@@ -37,29 +43,42 @@ export default function HubPage() {
 
   return (
     <div className="flex flex-col gap-[15px]">
-      <div>
-        <Eyebrow>Comunidade AUVP</Eyebrow>
-        <h1 className="mt-[4px] font-anek text-[30px] md:text-[41px] font-semibold leading-[1.15] text-foreground">
-          Hub da Comunidade
-        </h1>
+      <div className="flex gap-[24px] border-b border-border" role="tablist" aria-label="Seções da comunidade">
+        {HUB_TABS.map((t) => (
+          <button
+            key={t.value}
+            role="tab"
+            aria-selected={view === t.value}
+            onClick={() => setView(t.value)}
+            className={`-mb-px border-b-2 pb-[12px] font-anek text-[20px] font-semibold transition-all duration-240 md:text-[24px] ${
+              view === t.value ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
-      <TopicStories />
-
-      <LiveNowBanner />
-      <UpcomingLiveCard />
-
-      <div className="overflow-x-auto scrollbar-thin">
-        <Segmented options={FEEDS} value={feed} onChange={setFeed} />
-      </div>
-
-      {visiblePosts.length === 0 ? (
-        <EmptyState
-          title="Nada por aqui ainda"
-          subtitle={feed === 'following' ? 'Siga outros alunos para ver as publicações deles neste feed.' : 'Volte em breve para novidades.'}
-        />
+      {view === 'topicos' ? (
+        <TopicStories />
       ) : (
-        visiblePosts.map((post) => <PostCard key={post.id} post={post} />)
+        <>
+          <LiveNowBanner />
+          <UpcomingLiveCard />
+
+          <div className="overflow-x-auto scrollbar-thin">
+            <Segmented options={FEEDS} value={feed} onChange={setFeed} />
+          </div>
+
+          {visiblePosts.length === 0 ? (
+            <EmptyState
+              title="Nada por aqui ainda"
+              subtitle={feed === 'following' ? 'Siga outros alunos para ver as publicações deles neste feed.' : 'Volte em breve para novidades.'}
+            />
+          ) : (
+            visiblePosts.map((post) => <PostCard key={post.id} post={post} />)
+          )}
+        </>
       )}
     </div>
   )

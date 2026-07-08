@@ -20,7 +20,7 @@ import {
 import { useApp } from '../context/AppContext'
 import { useTheme } from '../context/ThemeContext'
 import { Avatar, ToastStack } from './ui'
-import AuvpLogo from './AuvpLogo'
+import AuvpEscolaLogo from './AuvpEscolaLogo'
 
 const NAV = [
   { to: '/', label: 'Hub da Comunidade', icon: House, end: true },
@@ -74,22 +74,20 @@ export default function Layout({ children }) {
             <List size={22} weight="bold" />
           </button>
 
-          <Link to="/" className="flex items-center gap-[8px]" aria-label="Comunidade AUVP — início">
-            <span className="flex h-[32px] w-[32px] items-center justify-center rounded-[5px] bg-primary p-[6px] text-primary-foreground">
-              <AuvpLogo className="h-full w-full" />
+          <Link to="/" className="flex flex-col items-start gap-[2px]" aria-label="Comunidade AUVP — início">
+            <span className="font-sora text-[9px] font-bold uppercase leading-none tracking-[0.2em] text-primary">
+              Comunidade
             </span>
-            <span className="hidden sm:block font-anek text-[20px] font-semibold text-foreground leading-none">
-              Comunidade AUVP
-            </span>
+            <AuvpEscolaLogo className="h-[36px] w-auto text-foreground" />
           </Link>
 
           <button
             onClick={() => navigate('/busca')}
-            className="ml-auto flex min-w-0 flex-1 max-w-[420px] items-center gap-[8px] rounded-[5px] border border-border px-[15px] py-[9px] text-left font-roboto text-[14px] text-muted-foreground transition-all duration-240 hover:border-primary"
+            className="ml-auto flex items-center gap-[8px] rounded-[5px] border border-border p-[9px] text-left font-roboto text-[14px] text-muted-foreground transition-all duration-240 hover:border-primary md:min-w-0 md:flex-1 md:max-w-[420px] md:px-[15px]"
             aria-label="Abrir busca avançada"
           >
             <MagnifyingGlass size={16} weight="bold" />
-            <span className="truncate">Buscar posts, usuários, tags, turmas…</span>
+            <span className="hidden truncate md:inline">Buscar posts, usuários, tags, turmas…</span>
           </button>
 
           <ThemeToggle />
@@ -182,7 +180,12 @@ export default function Layout({ children }) {
           <div className="absolute inset-0 bg-black/60" onClick={() => setDrawerOpen(false)} />
           <div className="animate-drawer-in absolute left-0 top-0 h-full w-[280px] max-w-[80vw] overflow-y-auto scrollbar-thin border-r border-border/60 bg-background/80 backdrop-blur-md p-[20px]">
             <div className="mb-[20px] flex items-center justify-between">
-              <span className="font-anek text-[18px] font-semibold text-foreground">Comunidade AUVP</span>
+              <div className="flex flex-col items-start gap-[2px]">
+                <span className="font-sora text-[9px] font-bold uppercase leading-none tracking-[0.2em] text-primary">
+                  Comunidade
+                </span>
+                <AuvpEscolaLogo className="h-[36px] w-auto text-foreground" />
+              </div>
               <button onClick={() => setDrawerOpen(false)} aria-label="Fechar menu" className="rounded-[5px] p-[6px] text-muted-foreground hover:bg-muted">
                 <X size={20} weight="bold" />
               </button>

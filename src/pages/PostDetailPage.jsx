@@ -13,6 +13,8 @@ import {
 import { useApp } from '../context/AppContext'
 import { VoteControl } from '../components/PostCard'
 import CoverArt from '../components/CoverArt'
+import RichComposer from '../components/RichComposer'
+import { RichText, stripMarkdown } from '../components/RichText'
 import { AreaPill, Avatar, Button, Card, EmptyState, FlairBadge, Modal, RoleLabel, TagPill, TurmaTag } from '../components/ui'
 import { AREAS, REACTIONS, REPORT_REASONS, timeAgo } from '../data/mock'
 
@@ -128,7 +130,7 @@ function CommentNode({ comment, byParent, post, depth, onReply, onReport }) {
             <span className="font-roboto text-[12px] text-muted-foreground">· {timeAgo(comment.createdAt)}</span>
           </div>
 
-          <p className="mt-[10px] font-roboto text-[15px] leading-[1.6] text-foreground">{comment.body}</p>
+          <RichText text={comment.body} className="mt-[10px] font-roboto text-[15px] leading-[1.6] text-foreground" />
 
           <ReactionBar commentId={comment.id} />
 
@@ -158,7 +160,7 @@ function CommentNode({ comment, byParent, post, depth, onReply, onReport }) {
             </button>
           ) : null}
           <button
-            onClick={() => onReport({ targetType: 'comment', targetId: comment.id, targetAuthorId: comment.authorId, excerpt: comment.body.slice(0, 120) })}
+            onClick={() => onReport({ targetType: 'comment', targetId: comment.id, targetAuthorId: comment.authorId, excerpt: stripMarkdown(comment.body).slice(0, 120) })}
             aria-label="Denunciar comentário"
             className="ml-auto flex items-center gap-[4px] rounded-[5px] px-[8px] py-[4px] font-sora text-[11px] font-bold uppercase tracking-[0.05em] text-muted-foreground transition-all duration-240 hover:text-destructive"
           >
@@ -241,7 +243,7 @@ export default function PostDetailPage() {
               <FlairBadge flair={post.flair} />
             </div>
             <h1 className="mt-[8px] font-anek text-[26px] md:text-[34px] font-semibold leading-[1.15] text-foreground">{post.title}</h1>
-            <p className="mt-[15px] font-roboto text-[17px] leading-[1.6] text-foreground">{post.body}</p>
+            <RichText text={post.body} className="mt-[15px] font-roboto text-[17px] leading-[1.6] text-foreground" />
 
             {post.tags.length > 0 && (
               <div className="mt-[15px] flex flex-wrap gap-[8px]">
@@ -297,20 +299,19 @@ export default function PostDetailPage() {
           {replyTo && (
             <div className="mb-[10px] flex items-center justify-between rounded-[5px] bg-muted px-[12px] py-[8px]">
               <p className="font-roboto text-[13px] text-muted-foreground">
-                Respondendo a <strong className="text-foreground">{users[replyTo.authorId].nickname}</strong>: “{replyTo.body.slice(0, 60)}…”
+                Respondendo a <strong className="text-foreground">{users[replyTo.authorId].nickname}</strong>: “{stripMarkdown(replyTo.body).slice(0, 60)}…”
               </p>
               <button type="button" onClick={() => setReplyTo(null)} className="font-sora text-[11px] font-bold uppercase text-primary">
                 Cancelar
               </button>
             </div>
           )}
-          <textarea
+          <RichComposer
             value={commentText}
-            onChange={(e) => setCommentText(e.target.value)}
+            onChange={setCommentText}
             placeholder={replyTo ? 'Escreva sua resposta…' : 'Contribua com o tópico…'}
             rows={3}
-            aria-label="Escrever comentário"
-            className="w-full resize-y rounded-[5px] border border-border bg-background p-[15px] font-roboto text-[15px] text-foreground outline-none transition-all duration-240 focus:border-primary"
+            ariaLabel="Escrever comentário"
           />
           <div className="mt-[10px] flex justify-end">
             <Button size="sm" type="submit" disabled={!commentText.trim()}>
