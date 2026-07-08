@@ -3,6 +3,7 @@ flowchart TD
     B --> C["CoverPicker: escolhe\narte de capa"]
     C --> D["Serviço de IA sugere Tags\nautomáticas com base no texto"]
     D --> E["Aluno publica o conteúdo\n-> passa a seguir o tópico\nautomaticamente"]
-    E --> F{Um conselheiro validou\numa resposta como solução?}
-    F -->|Sim| G["PostDetailPage destaca a resposta\n(visual do DS) + aviso 'Ir para solução'\nsob a pergunta, mantendo a ordem\ncronológica original"]
-    F -->|Não| H["Discussão segue na ordem\ncronológica normal, sem alterações"]
+    E --> F["Outros alunos respondem\nao tópico"]
+    F --> G{"O MODERADOR ou o AUTOR\nda pergunta validou uma\nresposta como solução?"}
+    G -->|Sim| H["PostDetailPage destaca a resposta\n(visual do DS, 'Resposta Validada')\n+ aviso 'Ir para solução' sob a pergunta.\nEstilo Reddit: resposta permanece na\nposição cronológica original, apenas\nganha destaque visual"]
+    G -->|Não| I["Discussão segue na ordem\ncronológica normal, sem destaque"]
