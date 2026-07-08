@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useApp } from '../context/AppContext'
 import PostCard from '../components/PostCard'
 import TopicStories from '../components/TopicStories'
+import CategoryGrid from '../components/CategoryGrid'
 import { LiveNowBanner, UpcomingLiveCard } from '../components/Live'
 import { EmptyState, Segmented } from '../components/ui'
 
@@ -60,9 +61,12 @@ export default function HubPage() {
       </div>
 
       {view === 'topicos' ? (
-        <TopicStories />
+        // "Tópicos" são as áreas (categorias/fóruns) da comunidade — não os
+        // posts das pessoas, que ficam na aba "Feed".
+        <CategoryGrid />
       ) : (
         <>
+          <TopicStories />
           <LiveNowBanner />
           <UpcomingLiveCard />
 

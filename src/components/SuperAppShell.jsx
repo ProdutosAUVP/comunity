@@ -20,25 +20,29 @@ const TABS = [
 export default function SuperAppShell({ children }) {
   return (
     <div className="mx-auto flex min-h-screen max-w-[1440px] flex-col bg-muted/40">
-      {/* Barra global do SuperApp (desktop) — só texto, sem ícones */}
+      {/* Barra global do SuperApp (desktop) — só texto, sem ícones. Alinhada
+          à esquerda com o conteúdo abaixo (mesmo container/padding do
+          cabeçalho e do corpo da página), não centralizada na tela. */}
       <nav
-        className="sticky top-0 z-[80] hidden h-[40px] items-center justify-center gap-[30px] border-b border-border/60 bg-background/70 backdrop-blur-md lg:flex"
+        className="sticky top-0 z-[80] hidden h-[40px] border-b border-border/60 bg-background/70 backdrop-blur-md lg:flex"
         aria-label="Menu global do SuperApp AUVP (mockado)"
       >
-        {TABS.map((tab) => {
-          const isActive = tab.key === 'comunidade'
-          return (
-            <span
-              key={tab.key}
-              aria-current={isActive ? 'page' : undefined}
-              className={`font-sora text-[12px] font-bold uppercase tracking-[0.05em] ${
-                isActive ? 'text-primary' : 'text-muted-foreground'
-              }`}
-            >
-              {tab.label}
-            </span>
-          )
-        })}
+        <div className="mx-auto flex w-full max-w-[1200px] items-center gap-[30px] px-6">
+          {TABS.map((tab) => {
+            const isActive = tab.key === 'comunidade'
+            return (
+              <span
+                key={tab.key}
+                aria-current={isActive ? 'page' : undefined}
+                className={`font-sora text-[12px] font-bold uppercase tracking-[0.05em] ${
+                  isActive ? 'text-primary' : 'text-muted-foreground'
+                }`}
+              >
+                {tab.label}
+              </span>
+            )
+          })}
+        </div>
       </nav>
 
       <div className="flex-1">{children}</div>

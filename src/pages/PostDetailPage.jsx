@@ -322,7 +322,7 @@ export default function PostDetailPage() {
   return (
     <div className="flex flex-col gap-[15px]">
       <Link to="/" className="flex w-fit items-center gap-[6px] font-sora text-[12px] font-bold uppercase tracking-[0.05em] text-primary hover:underline">
-        <ArrowLeft size={14} weight="bold" /> Voltar ao Hub
+        <ArrowLeft size={14} weight="bold" /> Voltar ao Início
       </Link>
 
       <Card>
