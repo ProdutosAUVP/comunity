@@ -60,9 +60,19 @@ export default function Layout({ children }) {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/* Logo no mobile: barra própria, fixa (nunca acompanha a rolagem),
+          acima dos botões e da busca. No desktop a logo volta para dentro
+          da barra principal, mantendo a visualidade em uma única linha. */}
+      <div className="fixed inset-x-0 top-0 z-50 flex h-[84px] items-center justify-center border-b border-border/60 bg-background/70 backdrop-blur-md lg:hidden">
+        <Link to="/" aria-label="Comunidade AUVP — início">
+          <AuvpEscolaLogo className="h-[72px] w-auto text-foreground" />
+        </Link>
+      </div>
+      <div className="h-[84px] lg:hidden" aria-hidden />
+
       {/* Barra superior — efeito glass sutil (fundo translúcido + blur) */}
-      <header className="sticky top-0 lg:top-[40px] z-40 border-b border-border/60 bg-background/70 backdrop-blur-md">
-        <div className="mx-auto flex h-[64px] max-w-[1200px] items-center gap-[15px] px-6">
+      <header className="sticky top-[84px] lg:top-[40px] z-40 border-b border-border/60 bg-background/70 backdrop-blur-md">
+        <div className="mx-auto flex h-[64px] max-w-[1200px] items-center gap-[15px] px-6 lg:h-[84px]">
           {/* Menu hamburguer (mobile) — a navegação inferior não é usada aqui
               porque a Comunidade roda embutida no SuperApp, que já tem sua
               própria barra de navegação inferior. */}
@@ -74,11 +84,8 @@ export default function Layout({ children }) {
             <List size={22} weight="bold" />
           </button>
 
-          <Link to="/" className="flex flex-col items-start gap-[2px]" aria-label="Comunidade AUVP — início">
-            <span className="font-sora text-[9px] font-bold uppercase leading-none tracking-[0.2em] text-primary">
-              Comunidade
-            </span>
-            <AuvpEscolaLogo className="h-[36px] w-auto text-foreground" />
+          <Link to="/" className="hidden lg:block" aria-label="Comunidade AUVP — início">
+            <AuvpEscolaLogo className="h-[72px] w-auto text-foreground" />
           </Link>
 
           <button
@@ -121,7 +128,7 @@ export default function Layout({ children }) {
       <div className="mx-auto flex max-w-[1200px] gap-[30px] px-6 py-[30px]">
         {/* Navegação lateral (desktop) */}
         <nav className="hidden lg:block w-[240px] shrink-0" aria-label="Navegação principal">
-          <div className="sticky top-[94px] lg:top-[134px] flex flex-col gap-[4px]">
+          <div className="sticky top-[94px] lg:top-[154px] flex flex-col gap-[4px]">
             {NAV.map(({ to, label, icon: Icon, end }) => (
               <NavLink key={to} to={to} end={end} className={navLinkCls}>
                 <Icon size={18} weight="bold" />
@@ -180,12 +187,7 @@ export default function Layout({ children }) {
           <div className="absolute inset-0 bg-black/60" onClick={() => setDrawerOpen(false)} />
           <div className="animate-drawer-in absolute left-0 top-0 h-full w-[280px] max-w-[80vw] overflow-y-auto scrollbar-thin border-r border-border/60 bg-background/80 backdrop-blur-md p-[20px]">
             <div className="mb-[20px] flex items-center justify-between">
-              <div className="flex flex-col items-start gap-[2px]">
-                <span className="font-sora text-[9px] font-bold uppercase leading-none tracking-[0.2em] text-primary">
-                  Comunidade
-                </span>
-                <AuvpEscolaLogo className="h-[36px] w-auto text-foreground" />
-              </div>
+              <AuvpEscolaLogo className="h-[44px] w-auto text-foreground" />
               <button onClick={() => setDrawerOpen(false)} aria-label="Fechar menu" className="rounded-[5px] p-[6px] text-muted-foreground hover:bg-muted">
                 <X size={20} weight="bold" />
               </button>

@@ -4,6 +4,7 @@ import { ArrowLeft, Sparkle, X } from '@phosphor-icons/react'
 import { useApp } from '../context/AppContext'
 import { AreaPill, Button, Card, Eyebrow, FlairBadge, TagPill } from '../components/ui'
 import RichComposer from '../components/RichComposer'
+import CoverPicker from '../components/CoverPicker'
 import { ALL_TAGS, AREAS, FLAIRS, suggestArea, suggestTags } from '../data/mock'
 
 export default function CreatePostPage() {
@@ -12,6 +13,7 @@ export default function CreatePostPage() {
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [flair, setFlair] = useState('Dúvida')
+  const [cover, setCover] = useState(null)
   const [area, setArea] = useState(null)
   const [areaTouched, setAreaTouched] = useState(false)
   const [tags, setTags] = useState([])
@@ -57,7 +59,7 @@ export default function CreatePostPage() {
     setPublishing(true)
     // Simula latência de rede para exibir o estado "loading" do botão
     setTimeout(() => {
-      const id = createPost({ title: title.trim(), body: body.trim(), flair, area, tags })
+      const id = createPost({ title: title.trim(), body: body.trim(), flair, area, tags, cover })
       navigate(`/post/${id}`)
     }, 700)
   }
@@ -106,6 +108,13 @@ export default function CreatePostPage() {
               ariaLabel="Detalhamento do post"
               textareaClassName="text-[16px]"
             />
+          </div>
+
+          <div>
+            <p className="mb-[8px] font-sora text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
+              Capa (opcional)
+            </p>
+            <CoverPicker value={cover} onChange={setCover} />
           </div>
 
           <div>

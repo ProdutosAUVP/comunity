@@ -111,13 +111,20 @@
   body {
     @apply font-roboto text-[17px] leading-[1.6] bg-background text-foreground transition-colors duration-240;
   }
+  /* Botões e links não têm indicador de foco próprio, então recebem o anel
+     global. Inputs/textareas/selects já mudam a cor da própria borda ao
+     focar (focus:border-*) — empilhar o anel global por cima deles criava
+     uma "seleção dupla" desalinhada (o anel ficava sobre o container em vez
+     de acompanhar o elemento focado), então eles ficam de fora desta regra. */
   button:focus-visible,
-  a:focus-visible,
+  a:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
   input:focus-visible,
   textarea:focus-visible,
   select:focus-visible {
-    outline: 2px solid hsl(var(--ring));
-    outline-offset: 2px;
+    outline: none;
   }
 }
 

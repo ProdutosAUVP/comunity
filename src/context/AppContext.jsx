@@ -104,7 +104,7 @@ export function AppProvider({ children }) {
 
   // ── Posts e comentários ──────────────────────────────────────────────
   const createPost = useCallback(
-    ({ title, body, flair, area, tags }) => {
+    ({ title, body, flair, area, tags, cover }) => {
       const id = nextId('p')
       const post = {
         id,
@@ -114,6 +114,7 @@ export function AppProvider({ children }) {
         flair,
         area,
         tags,
+        cover: cover || undefined,
         turma: currentUser.turma,
         createdAt: new Date().toISOString(),
         upvotes: 1,
@@ -477,6 +478,43 @@ export function AppProvider({ children }) {
     [logAction, toast],
   )
 
+  // Moderação de comentários — mesmo padrão dos tópicos (editar, ocultar,
+  // excluir com soft delete), disponível em qualquer lugar do programa onde
+  // um comentário apareça (tópico, perfil, fila de validação da moderação).
+  const editComment = useCallback(
+    (commentId, patch) => {
+      setComments((cs) => cs.map((c) => (c.id === commentId ? { ...c, ...patch } : c)))
+      logAction('Editar Comentário', '-', `Comentário ${commentId}`, 'Edição direta pela moderação', false)
+      toast('Comentário editado pela moderação.')
+    },
+    [logAction, toast],
+  )
+
+  const toggleCommentHidden = useCallback(
+    (commentId) => {
+      let nowHidden = false
+      setComments((cs) =>
+        cs.map((c) => {
+          if (c.id !== commentId) return c
+          nowHidden = !c.hidden
+          return { ...c, hidden: nowHidden }
+        }),
+      )
+      logAction(nowHidden ? 'Ocultar Comentário' : 'Reexibir Comentário', '-', `Comentário ${commentId}`, 'Ação direta na visão da comunidade')
+      toast(nowHidden ? 'Comentário ocultado da comunidade.' : 'Comentário reexibido na comunidade.')
+    },
+    [logAction, toast],
+  )
+
+  const deleteComment = useCallback(
+    (commentId) => {
+      setComments((cs) => cs.map((c) => (c.id === commentId ? { ...c, hidden: true, deleted: true } : c)))
+      logAction('Remover Comentário', '-', `Comentário ${commentId}`, 'Exclusão direta pela moderação (soft delete)', true)
+      toast('Comentário removido. Registro mantido no Log de Auditoria (soft delete).')
+    },
+    [logAction, toast],
+  )
+
   // ── Programa de Conselheiros (conversas 1:1 agendadas) ────────────────
   let bookingSeq = 100
   const bookMeeting = useCallback((conselheiroId, slot) => {
@@ -539,6 +577,9 @@ export function AppProvider({ children }) {
       togglePostHidden,
       movePost,
       deletePost,
+      editComment,
+      toggleCommentHidden,
+      deleteComment,
       conselheiroBookings,
       bookMeeting,
       cancelBooking,
@@ -574,7 +615,8 @@ export function AppProvider({ children }) {
       toggleReaction, notifications, conversations,
       friendRequests, blockedUsers, dmSentToday, reports, nicknameQueue, auditLog, sanctions,
       settings, toasts, liveDismissed, moderationMode, toggleModerationMode, editPost,
-      togglePostHidden, movePost, deletePost, conselheiroBookings, bookMeeting, cancelBooking,
+      togglePostHidden, movePost, deletePost, editComment, toggleCommentHidden, deleteComment,
+      conselheiroBookings, bookMeeting, cancelBooking,
       submitCsat, toggleAuvpSempre, toast, votePost, voteComment, createPost, addComment,
       markSolution, validateAnswer, reportContent, toggleFollow, acceptFriendRequest,
       declineFriendRequest, sendMessage, moveToPrincipal, blockUser, markNotificationsRead,

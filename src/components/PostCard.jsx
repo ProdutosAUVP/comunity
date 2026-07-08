@@ -15,6 +15,8 @@ import { useApp } from '../context/AppContext'
 import { AREAS, timeAgo } from '../data/mock'
 import { AreaPill, Avatar, Button, Card, FlairBadge, Modal, RoleLabel, TagPill, TurmaTag } from './ui'
 import CoverArt from './CoverArt'
+import CoverPicker from './CoverPicker'
+import RichComposer from './RichComposer'
 import { stripMarkdown } from './RichText'
 
 export function VoteControl({ score, vote, onVote, vertical = true }) {
@@ -57,6 +59,7 @@ function ModTools({ post }) {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [title, setTitle] = useState(post.title)
   const [body, setBody] = useState(post.body)
+  const [cover, setCover] = useState(post.cover || null)
 
   const stop = (e) => e.stopPropagation()
 
@@ -87,7 +90,7 @@ function ModTools({ post }) {
         )}
       </div>
 
-      <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Editar tópico">
+      <Modal open={editOpen} onClose={() => setEditOpen(false)} title="Editar tópico" wide>
         <div onClick={stop} className="flex flex-col gap-[15px]">
           <div>
             <label className="mb-[6px] block font-sora text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Título</label>
@@ -99,12 +102,11 @@ function ModTools({ post }) {
           </div>
           <div>
             <label className="mb-[6px] block font-sora text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Detalhamento</label>
-            <textarea
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              rows={5}
-              className="w-full resize-y rounded-[5px] border border-border bg-background p-[12px] font-roboto text-[15px] text-foreground outline-none focus:border-primary"
-            />
+            <RichComposer value={body} onChange={setBody} rows={5} ariaLabel="Detalhamento do post" />
+          </div>
+          <div>
+            <label className="mb-[6px] block font-sora text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Capa</label>
+            <CoverPicker value={cover} onChange={setCover} />
           </div>
           <div className="flex justify-end gap-[15px]">
             <Button size="sm" variant="ghost" onClick={() => setEditOpen(false)}>
@@ -113,7 +115,7 @@ function ModTools({ post }) {
             <Button
               size="sm"
               onClick={() => {
-                editPost(post.id, { title: title.trim() || post.title, body: body.trim() || post.body })
+                editPost(post.id, { title: title.trim() || post.title, body: body.trim() || post.body, cover: cover || null })
                 setEditOpen(false)
               }}
             >
